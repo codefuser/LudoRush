@@ -16,6 +16,9 @@
     "start": "npm run start -w server",
     "test": "npm run test -w server"
   },
+  "dependencies": {
+    "typescript": "^5.7.2"
+  },
   "devDependencies": {
     "concurrently": "^9.2.5"
   }
