@@ -87,13 +87,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
       </div>
 
       {/* Main Action Card */}
-      <div className="w-full glass-panel p-6 shadow-2xl">
+      <div className="w-full glass-panel p-6 sm:p-8 shadow-2xl rounded-3xl">
         {/* Tab Switcher */}
-        <div className="flex rounded-xl bg-slate-900/80 p-1 mb-5 border border-slate-800">
+        <div className="flex rounded-2xl bg-slate-900/90 p-1.5 mb-6 border border-slate-800">
           <button
             type="button"
             onClick={() => setTab('create')}
-            className={`flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+            className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${
               tab === 'create'
                 ? 'bg-cyan-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
@@ -104,7 +104,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <button
             type="button"
             onClick={() => setTab('join')}
-            className={`flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+            className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${
               tab === 'join'
                 ? 'bg-cyan-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
@@ -115,9 +115,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         {tab === 'create' ? (
-          <form onSubmit={handleCreate} className="flex flex-col gap-4">
+          <form onSubmit={handleCreate} className="flex flex-col gap-5">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-2">
                 Your Display Name
               </label>
               <input
@@ -126,24 +126,24 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 value={playerName}
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="e.g. MasterRoller"
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all shadow-inner"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1">
-                  <Users size={13} /> Players
+                <label className="block text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
+                  <Users size={14} className="text-cyan-400" /> Players
                 </label>
-                <div className="flex gap-1.5">
+                <div className="flex gap-2">
                   {[2, 3, 4].map((num) => (
                     <button
                       key={num}
                       type="button"
                       onClick={() => setMaxPlayers(num as 2 | 3 | 4)}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
                         maxPlayers === num
-                          ? 'bg-cyan-600 border-cyan-400 text-white'
+                          ? 'bg-cyan-600 border-cyan-400 text-white shadow-sm'
                           : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white'
                       }`}
                     >
@@ -154,18 +154,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1">
-                  <Clock size={13} /> Turn Timer
+                <label className="block text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
+                  <Clock size={14} className="text-cyan-400" /> Turn Timer
                 </label>
-                <div className="flex gap-1.5">
+                <div className="flex gap-2">
                   {[0, 15, 30].map((sec) => (
                     <button
                       key={sec}
                       type="button"
                       onClick={() => setTurnTimer(sec)}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
                         turnTimer === sec
-                          ? 'bg-cyan-600 border-cyan-400 text-white'
+                          ? 'bg-cyan-600 border-cyan-400 text-white shadow-sm'
                           : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white'
                       }`}
                     >
@@ -178,15 +178,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
             <button
               type="submit"
-              className="mt-2 w-full py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              className="mt-2 w-full py-4 px-6 rounded-2xl font-extrabold text-sm sm:text-base bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              <Sparkles size={16} /> Create Private Room
+              <Sparkles size={18} /> Create Private Room
             </button>
           </form>
         ) : (
-          <form onSubmit={handleJoin} className="flex flex-col gap-4">
+          <form onSubmit={handleJoin} className="flex flex-col gap-5">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-2">
                 Your Display Name
               </label>
               <input
@@ -195,12 +195,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 value={playerName}
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="e.g. LuckyLudo"
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all shadow-inner"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-2">
                 6-Digit Room Code
               </label>
               <input
@@ -209,20 +209,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                 placeholder="e.g. 7A9BK2"
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white placeholder-slate-500 text-center font-mono tracking-widest text-lg uppercase font-bold focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white placeholder-slate-500 text-center font-mono tracking-widest text-lg uppercase font-bold focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all shadow-inner"
               />
             </div>
 
             <button
               type="submit"
               disabled={!roomCode.trim()}
-              className={`mt-2 w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+              className={`mt-2 w-full py-4 px-6 rounded-2xl font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 transition-all ${
                 roomCode.trim()
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98]'
                   : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
               }`}
             >
-              Join Game <ArrowRight size={16} />
+              Join Game <ArrowRight size={18} />
             </button>
           </form>
         )}
@@ -231,9 +231,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* Quick Rules Modal / Accordion Button */}
       <button
         onClick={() => setShowRules(!showRules)}
-        className="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-cyan-400 transition-colors"
+        className="mt-6 px-5 py-2.5 rounded-full bg-slate-900/80 border border-slate-700/80 hover:border-cyan-500/60 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white flex items-center gap-2 shadow-md hover:scale-105 transition-all"
       >
-        <HelpCircle size={15} /> How to Play & Rules
+        <HelpCircle size={16} className="text-cyan-400" /> How to Play & Rules
       </button>
 
       {/* Rules Modal */}

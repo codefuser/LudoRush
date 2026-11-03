@@ -46,11 +46,13 @@ export function useMultiplayer() {
 
   // Initialize socket
   useEffect(() => {
-    const serverUrl = (import.meta as any).env?.VITE_SERVER_URL || undefined;
+    const serverUrl = import.meta.env.VITE_SERVER_URL || undefined;
+    console.log('[LudoRush] Connecting to multiplayer server:', serverUrl || window.location.origin);
+
     const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(serverUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
-      reconnectionAttempts: 15,
+      reconnectionAttempts: 20,
       reconnectionDelay: 1000,
     });
 

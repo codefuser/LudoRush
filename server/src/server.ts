@@ -17,16 +17,20 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const CLIENT_URL = process.env.CLIENT_URL || '*';
 
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
+// Allow dynamic CORS reflection so credentials work with Vercel, localhost, and custom domains
+const corsOrigin = (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+  callback(null, true);
+};
+
+app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(express.json());
 
 const httpServer = http.createServer(app);
 
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: {
-    origin: CLIENT_URL,
+    origin: (origin, callback) => callback(null, true),
     methods: ['GET', 'POST'],
     credentials: true,
   },
