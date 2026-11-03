@@ -27,6 +27,9 @@ export class Room {
   private participants: Map<string, RoomParticipant> = new Map(); // playerId -> participant
   private engine: LudoEngine | null = null;
   private timerInterval: NodeJS.Timeout | null = null;
+  private rollInProgress: boolean = false;
+  private pendingAdvanceTimeout: NodeJS.Timeout | null = null;
+  private pendingAutoMoveTimeout: NodeJS.Timeout | null = null;
   private io: Server;
 
   constructor(
@@ -295,16 +298,68 @@ export class Room {
     }
   }
 
+  public clearPendingAdvance(): void {
+    if (this.pendingAdvanceTimeout) {
+      clearTimeout(this.pendingAdvanceTimeout);
+      this.pendingAdvanceTimeout = null;
+    }
+  }
+
+  public clearPendingAutoMove(): void {
+    if (this.pendingAutoMoveTimeout) {
+      clearTimeout(this.pendingAutoMoveTimeout);
+      this.pendingAutoMoveTimeout = null;
+    }
+  }
+
+  public scheduleAdvanceTurn(delayMs: number): void {
+    this.clearPendingAdvance();
+    this.pendingAdvanceTimeout = setTimeout(() => {
+      this.pendingAdvanceTimeout = null;
+      if (this.status === 'PLAYING') {
+        this.advanceTurn();
+        this.io.to(this.id).emit('game:state', { state: this.getGameState() });
+      }
+    }, delayMs);
+  }
+
+  public scheduleAutoMove(playerId: string, tokenId: number, delayMs: number): void {
+    this.clearPendingAutoMove();
+    this.pendingAutoMoveTimeout = setTimeout(() => {
+      this.pendingAutoMoveTimeout = null;
+      if (this.status === 'PLAYING') {
+        const curState = this.getGameState();
+        if (curState.awaitingMove && curState.legalTokenIndices.includes(tokenId)) {
+          this.moveToken(playerId, tokenId);
+        }
+      }
+    }, delayMs);
+  }
+
   public rollDice(playerId: string) {
     if (!this.engine) return { success: false, error: 'Game not running' };
+    if (this.rollInProgress) {
+      return { success: false, error: 'Dice roll already in progress' };
+    }
     const res = this.engine.rollDice(playerId);
     if (res.success) {
+      this.rollInProgress = true;
       this.lastActiveAt = Date.now();
+      if (!res.hasMoves && res.roll === 6) {
+        // Rolled a 6 with no moves: let player roll again after 1000ms
+        setTimeout(() => {
+          this.rollInProgress = false;
+          this.io.to(this.id).emit('game:state', { state: this.getGameState() });
+        }, 1000);
+      }
     }
     return res;
   }
 
   public advanceTurn(): void {
+    this.clearPendingAdvance();
+    this.clearPendingAutoMove();
+    this.rollInProgress = false;
     if (this.engine && this.status === 'PLAYING') {
       this.engine.advanceTurn();
       this.startTurnTimer();
@@ -312,10 +367,12 @@ export class Room {
   }
 
   public moveToken(playerId: string, tokenId: number): MoveResult {
+    this.clearPendingAutoMove();
     if (!this.engine) return { success: false, error: 'Game not running' };
     const activePlayer = this.engine.getActivePlayer();
     const res = this.engine.moveToken(tokenId, playerId);
     if (res.success) {
+      this.rollInProgress = false;
       this.lastActiveAt = Date.now();
       this.broadcastMove(res, activePlayer.color);
     }
@@ -398,6 +455,8 @@ export class Room {
   }
 
   public cleanup(): void {
+    this.clearPendingAdvance();
+    this.clearPendingAutoMove();
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;

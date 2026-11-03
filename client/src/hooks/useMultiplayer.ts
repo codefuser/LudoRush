@@ -55,6 +55,7 @@ export function useMultiplayer() {
   const [reactions, setReactions] = useState<FloatingReaction[]>([]);
 
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  const rollLockRef = useRef(false);
 
   // Initialize socket
   useEffect(() => {
@@ -168,16 +169,20 @@ export function useMultiplayer() {
 
     socket.on('room:error', ({ message }: { message: string; code?: string }) => {
       setError(message);
+      rollLockRef.current = false;
+      setIsRolling(false);
       setTimeout(() => setError(null), 4000);
     });
 
     socket.on('game:started', ({ state }: { state: GameState }) => {
       setGameState(state);
+      rollLockRef.current = false;
       sounds.playEnter();
     });
 
     socket.on('game:state', ({ state }: { state: GameState }) => {
       setGameState(state);
+      rollLockRef.current = false;
       if (localPlayer) {
         const updatedMe = state.players.find((p: Player) => p.id === localPlayer.id);
         if (updatedMe) setLocalPlayer(updatedMe);
@@ -316,7 +321,10 @@ export function useMultiplayer() {
   }, []);
 
   const rollDice = useCallback(() => {
+    if (rollLockRef.current) return;
     if (socketRef.current) {
+      rollLockRef.current = true;
+      setIsRolling(true);
       socketRef.current.emit('game:roll');
     }
   }, []);

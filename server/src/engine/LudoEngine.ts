@@ -115,6 +115,10 @@ export class LudoEngine {
       return { success: false, error: 'Must move a token before rolling again' };
     }
 
+    if (this.state.currentRoll !== null) {
+      return { success: false, error: 'Already rolled for this turn' };
+    }
+
     // Cryptographically secure random integer between 1 and 6 inclusive
     const roll = crypto.randomInt(1, 7);
     this.state.currentRoll = roll;

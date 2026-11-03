@@ -283,26 +283,12 @@ export function registerSocketHandlers(
       }
 
       if (shouldAutoMove && autoTokenId !== undefined) {
-        const targetId = autoTokenId;
-        setTimeout(() => {
-          if (room.status === 'PLAYING') {
-            const curState = room.getGameState();
-            // Check move is still pending and token is still eligible
-            if (curState.awaitingMove && curState.legalTokenIndices.includes(targetId)) {
-              room.moveToken(playerId, targetId);
-            }
-          }
-        }, 450); // Fast, responsive 450ms delay
+        room.scheduleAutoMove(playerId, autoTokenId, 500);
       }
 
-      // Scenario B: No legal moves (or 3 sixes cancel) -> show rolled dice for 1.2s then advance turn
+      // Scenario B: No legal moves (or 3 sixes cancel) -> show rolled dice for 1.4s then advance turn
       if ((!res.hasMoves && res.roll !== 6) || res.turnCancelled) {
-        setTimeout(() => {
-          if (room.status === 'PLAYING') {
-            room.advanceTurn();
-            io.to(room.id).emit('game:state', { state: room.getGameState() });
-          }
-        }, 1200);
+        room.scheduleAdvanceTurn(1400);
       }
     });
 

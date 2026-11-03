@@ -28,6 +28,7 @@ export const Dice: React.FC<DiceProps> = ({
   // Cumulative rotation tracking so spins are natural and don't snap backwards
   const rollCountRef = useRef(0);
   const [rotation, setRotation] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [clickLocked, setClickLocked] = useState(false);
 
   // Map dice value (1..6) to rotation (rotateX, rotateY) to bring that face to the front
   const getFaceRotation = (val: number): { x: number; y: number } => {
@@ -61,9 +62,18 @@ export const Dice: React.FC<DiceProps> = ({
     }
   }, [value, isRolling]);
 
+  useEffect(() => {
+    // Unlock click state when rolling finishes or when turn resets
+    if (!isRolling) {
+      const timer = setTimeout(() => setClickLocked(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [value, canRoll, isRolling]);
+
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (canRoll && !isRolling) {
+    if (canRoll && !isRolling && !clickLocked) {
+      setClickLocked(true);
       sounds.playDiceClick();
       onRoll();
     }
@@ -135,12 +145,15 @@ export const Dice: React.FC<DiceProps> = ({
   return (
     <div
       onClick={handleClick}
-      title={canRoll ? 'Click to Roll Dice!' : `${config.name} Dice`}
+      title={canRoll && !clickLocked ? 'Click to Roll Dice!' : `${config.name} Dice`}
       className={`relative select-none inline-flex items-center gap-2.5 mx-2 ${
         align === 'right' ? 'flex-row-reverse' : 'flex-row'
       }`}
       style={{
-        cursor: canRoll && !isRolling ? 'pointer' : 'default',
+        display: 'inline-flex',
+        flexDirection: align === 'right' ? 'row-reverse' : 'row',
+        alignItems: 'center',
+        cursor: canRoll && !isRolling && !clickLocked ? 'pointer' : 'default',
       }}
     >
       {/* 3D Scene Viewport */}
@@ -149,7 +162,7 @@ export const Dice: React.FC<DiceProps> = ({
         style={{
           width: `${size}px`,
           height: `${size}px`,
-          filter: canRoll
+          filter: canRoll && !clickLocked
             ? `drop-shadow(0 0 10px ${config.hex}) drop-shadow(0 4px 8px rgba(0,0,0,0.5))`
             : 'drop-shadow(0 3px 6px rgba(0,0,0,0.35))',
         }}
@@ -216,7 +229,7 @@ export const Dice: React.FC<DiceProps> = ({
       </div>
 
       {/* Side Prompt Pill (Placed beside dice - NEVER overlaps dice face!) */}
-      {canRoll && !isRolling && (
+      {canRoll && !isRolling && !clickLocked && (
         <span
           className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white shadow-lg pointer-events-none whitespace-nowrap animate-pulse shrink-0"
           style={{
