@@ -133,7 +133,6 @@ export class LudoEngine {
     ) {
       this.state.lastActionMessage = `${activePlayer.name} rolled three consecutive 6s! Turn cancelled.`;
       this.state.consecutiveSixes = 0;
-      this.advanceTurn();
       return {
         success: true,
         roll,
@@ -172,8 +171,7 @@ export class LudoEngine {
           turnCancelled: false,
         };
       } else {
-        this.state.lastActionMessage = `${activePlayer.name} rolled a ${roll} with no legal moves. Turn passed.`;
-        this.advanceTurn();
+        this.state.lastActionMessage = `${activePlayer.name} rolled a ${roll} with no legal moves. Passing turn...`;
         return {
           success: true,
           roll,

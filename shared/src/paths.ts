@@ -107,13 +107,40 @@ export const HOME_STRETCH_COORDS: Record<PlayerColor, GridCoord[]> = {
 };
 
 /**
- * Center finish triangle locations.
+ * Center finish triangle locations and individual token slots.
  */
+export const FINISH_SLOTS: Record<PlayerColor, GridCoord[]> = {
+  red: [
+    { x: 5.8, y: 6.7 },
+    { x: 5.8, y: 7.3 },
+    { x: 6.3, y: 6.8 },
+    { x: 6.3, y: 7.2 },
+  ],
+  green: [
+    { x: 6.7, y: 5.8 },
+    { x: 7.3, y: 5.8 },
+    { x: 6.8, y: 6.3 },
+    { x: 7.2, y: 6.3 },
+  ],
+  yellow: [
+    { x: 8.2, y: 6.7 },
+    { x: 8.2, y: 7.3 },
+    { x: 7.7, y: 6.8 },
+    { x: 7.7, y: 7.2 },
+  ],
+  blue: [
+    { x: 6.7, y: 8.2 },
+    { x: 7.3, y: 8.2 },
+    { x: 6.8, y: 7.7 },
+    { x: 7.2, y: 7.7 },
+  ],
+};
+
 export const FINISH_COORDS: Record<PlayerColor, GridCoord> = {
-  red: { x: 6.5, y: 7.0 },
-  green: { x: 7.0, y: 6.5 },
-  yellow: { x: 7.5, y: 7.0 },
-  blue: { x: 7.0, y: 7.5 },
+  red: { x: 6.0, y: 7.0 },
+  green: { x: 7.0, y: 6.0 },
+  yellow: { x: 8.0, y: 7.0 },
+  blue: { x: 7.0, y: 8.0 },
 };
 
 /**
@@ -155,7 +182,7 @@ export function getTokenGridPosition(token: Token): GridCoord {
   }
 
   if (token.state === 'FINISHED' || token.step >= FINISH_STEP) {
-    return FINISH_COORDS[token.color];
+    return FINISH_SLOTS[token.color]?.[token.id] || FINISH_COORDS[token.color];
   }
 
   if (token.state === 'HOME_STRETCH' || token.step >= 51) {

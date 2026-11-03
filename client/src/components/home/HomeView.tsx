@@ -7,8 +7,10 @@ import {
   Sparkles,
   HelpCircle,
   ArrowRight,
-  ShieldAlert,
   Trophy,
+  User,
+  Hash,
+  Dice5,
 } from 'lucide-react';
 
 interface HomeViewProps {
@@ -69,11 +71,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
   return (
     <div className="w-full max-w-md mx-auto p-4 sm:p-6 flex flex-col items-center justify-center min-h-[85vh]">
       {/* Brand Logo & Title with 4 Ludo Colors */}
-      <div className="flex flex-col items-center text-center mb-8">
-        <div className="relative mb-4">
-          <div className="w-20 h-20 rounded-3xl p-1 bg-gradient-to-tr from-rose-500 via-amber-400 to-cyan-400 shadow-xl shadow-cyan-500/25 flex items-center justify-center">
+      <div className="flex flex-col items-center text-center mb-7">
+        <div className="relative mb-3.5">
+          <div className="w-20 h-20 rounded-3xl p-1 bg-gradient-to-tr from-rose-500 via-amber-400 to-cyan-400 shadow-2xl shadow-cyan-500/20 flex items-center justify-center transition-transform hover:scale-105">
             <div className="w-full h-full rounded-[22px] bg-slate-950 flex items-center justify-center relative overflow-hidden">
-              <div className="grid grid-cols-2 gap-2 p-3">
+              <div className="grid grid-cols-2 gap-2.5 p-3">
                 <div className="w-4 h-4 rounded-full bg-[#F51F2B] shadow-sm shadow-red-500/80 animate-pulse" />
                 <div className="w-4 h-4 rounded-full bg-[#08B84B] shadow-sm shadow-green-500/80" />
                 <div className="w-4 h-4 rounded-full bg-[#087CF0] shadow-sm shadow-blue-500/80" />
@@ -86,13 +88,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white font-display">
           LUDO <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500">RUSH</span>
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-xs font-medium">
+        <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-xs font-medium">
           Real-time multiplayer board game. Play instantly with friends on any device.
         </p>
       </div>
 
       {/* Main Action Card */}
-      <div className="w-full ludo-hero-card p-6 sm:p-8">
+      <div className="w-full ludo-hero-card p-5 sm:p-7">
         {/* Tab Switcher */}
         <div className="ludo-tab-bar mb-6">
           <button
@@ -112,25 +114,27 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         {tab === 'create' ? (
-          <form onSubmit={handleCreate} className="flex flex-col gap-5">
+          <form onSubmit={handleCreate} className="flex flex-col gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-                Your Display Name
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                <User size={13} className="text-cyan-400" /> Your Display Name
               </label>
-              <input
-                type="text"
-                maxLength={18}
-                value={playerName}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="e.g. MasterRoller"
-                className="ludo-input-field"
-              />
+              <div className="relative flex items-center">
+                <input
+                  type="text"
+                  maxLength={18}
+                  value={playerName}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="e.g. MasterRoller"
+                  className="ludo-input-field"
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                  <Users size={14} className="text-cyan-400" /> Players
+                  <Users size={13} className="text-cyan-400" /> Players
                 </label>
                 <div className="ludo-chip-group">
                   {[2, 3, 4].map((num) => (
@@ -148,7 +152,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                  <Clock size={14} className="text-cyan-400" /> Turn Timer
+                  <Clock size={13} className="text-cyan-400" /> Timer
                 </label>
                 <div className="ludo-chip-group">
                   {[0, 15, 30].map((sec) => (
@@ -172,7 +176,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             >
               {connected ? (
                 <>
-                  <Sparkles size={18} /> <span>Create Private Room</span>
+                  <Sparkles size={17} /> <span>Create Private Room</span>
                 </>
               ) : (
                 <>
@@ -182,16 +186,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
               )}
             </button>
             {!connected && (
-              <p className="text-[11px] text-amber-400/90 text-center -mt-1 font-medium animate-pulse">
+              <p className="text-[11px] text-amber-400/90 text-center font-medium animate-pulse">
                 Connecting to multiplayer backend...
               </p>
             )}
           </form>
         ) : (
-          <form onSubmit={handleJoin} className="flex flex-col gap-5">
+          <form onSubmit={handleJoin} className="flex flex-col gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-                Your Display Name
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                <User size={13} className="text-cyan-400" /> Your Display Name
               </label>
               <input
                 type="text"
@@ -204,8 +208,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-                6-Digit Room Code
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                <Hash size={13} className="text-cyan-400" /> 6-Digit Room Code
               </label>
               <input
                 type="text"
@@ -224,7 +228,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             >
               {connected ? (
                 <>
-                  <span>Join Game</span> <ArrowRight size={18} />
+                  <span>Join Game</span> <ArrowRight size={17} />
                 </>
               ) : (
                 <>
@@ -234,7 +238,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               )}
             </button>
             {!connected && (
-              <p className="text-[11px] text-amber-400/90 text-center -mt-1 font-medium animate-pulse">
+              <p className="text-[11px] text-amber-400/90 text-center font-medium animate-pulse">
                 Connecting to multiplayer backend...
               </p>
             )}
@@ -247,12 +251,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
         onClick={() => setShowRules(!showRules)}
         className="mt-6 ludo-pill-btn"
       >
-        <HelpCircle size={16} className="text-cyan-400" /> How to Play & Rules
+        <HelpCircle size={15} className="text-cyan-400" /> How to Play & Rules
       </button>
 
       {/* Rules Modal */}
       {showRules && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="glass-panel max-w-md w-full p-6 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-white font-display flex items-center gap-2">

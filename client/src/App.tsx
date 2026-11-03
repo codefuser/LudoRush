@@ -119,7 +119,10 @@ export const App: React.FC = () => {
           /* Live Game Screen */
           <div className="w-full max-w-4xl flex flex-col items-center gap-2">
             {/* Top Status & Turn Bar */}
-            <div className="w-full max-w-[600px] glass-panel px-3 py-2 flex flex-col sm:flex-row items-center justify-between gap-1.5">
+            <div
+              style={{ minHeight: '40px' }}
+              className="w-full max-w-[600px] glass-panel px-3 py-2 flex items-center justify-between gap-1.5"
+            >
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-slate-400">
                   Current Turn:
@@ -143,39 +146,47 @@ export const App: React.FC = () => {
               </div>
 
               {/* Action Prompt / Guide */}
-              <div className="text-xs text-slate-300 font-medium truncate text-center sm:text-right">
+              <div className="text-xs text-slate-300 font-medium truncate text-right">
                 {gameState.lastActionMessage || 'Game in progress...'}
               </div>
             </div>
 
-            {/* Top Players Row (Red & Green) */}
-            <div className="w-full grid grid-cols-2 gap-2 max-w-[600px]">
-              {gameState.players[0] && (
-                <PlayerCard
-                  player={gameState.players[0]}
-                  isActive={gameState.activePlayerIndex === 0}
-                  isLocal={localPlayer?.id === gameState.players[0].id}
-                  turnTimeRemaining={gameState.turnTimeRemaining}
-                  maxTurnTime={gameState.settings.turnTimerSeconds}
-                />
-              )}
-              {gameState.players[1] ? (
-                <PlayerCard
-                  player={gameState.players[1]}
-                  isActive={gameState.activePlayerIndex === 1}
-                  isLocal={localPlayer?.id === gameState.players[1].id}
-                  turnTimeRemaining={gameState.turnTimeRemaining}
-                  maxTurnTime={gameState.settings.turnTimerSeconds}
-                />
-              ) : (
-                <div />
-              )}
+            {/* Top Players Row (Red = Left, Green = Right) */}
+            <div
+              style={{ height: '44px', minHeight: '44px', maxHeight: '44px' }}
+              className="w-full grid grid-cols-2 gap-2 max-w-[600px]"
+            >
+              <div className="h-full flex items-center">
+                {gameState.players.find((p) => p.color === 'red') && (
+                  <PlayerCard
+                    player={gameState.players.find((p) => p.color === 'red')!}
+                    isActive={activePlayer?.color === 'red'}
+                    isLocal={localPlayer?.color === 'red'}
+                    turnTimeRemaining={gameState.turnTimeRemaining}
+                    maxTurnTime={gameState.settings.turnTimerSeconds}
+                  />
+                )}
+              </div>
+              <div className="h-full flex items-center">
+                {gameState.players.find((p) => p.color === 'green') && (
+                  <PlayerCard
+                    player={gameState.players.find((p) => p.color === 'green')!}
+                    isActive={activePlayer?.color === 'green'}
+                    isLocal={localPlayer?.color === 'green'}
+                    turnTimeRemaining={gameState.turnTimeRemaining}
+                    maxTurnTime={gameState.settings.turnTimerSeconds}
+                  />
+                )}
+              </div>
             </div>
 
-            {/* TOP DICE TRAY (Outside board: Left = Above Red quadrant, Right = Above Green quadrant) */}
-            <div className="w-full max-w-[600px] flex items-center justify-between px-6 h-14">
+            {/* TOP DICE TRAY (Fixed height 64px: Left = Above Red, Right = Above Green) */}
+            <div
+              style={{ height: '64px', minHeight: '64px', maxHeight: '64px' }}
+              className="w-full max-w-[600px] flex items-center justify-between px-6"
+            >
               {/* Left slot: Directly above Red quadrant */}
-              <div className="w-[45%] flex items-center justify-center">
+              <div className="w-[45%] flex items-center justify-center h-full">
                 {isRedActive && activePlayer && (
                   <Dice
                     color="red"
@@ -189,7 +200,7 @@ export const App: React.FC = () => {
               </div>
 
               {/* Right slot: Directly above Green quadrant */}
-              <div className="w-[45%] flex items-center justify-center">
+              <div className="w-[45%] flex items-center justify-center h-full">
                 {isGreenActive && activePlayer && (
                   <Dice
                     color="green"
@@ -212,10 +223,13 @@ export const App: React.FC = () => {
               onMoveToken={moveToken}
             />
 
-            {/* BOTTOM DICE TRAY (Outside board: Left = Below Blue quadrant, Right = Below Yellow quadrant) */}
-            <div className="w-full max-w-[600px] flex items-center justify-between px-6 h-14">
+            {/* BOTTOM DICE TRAY (Fixed height 64px: Left = Below Blue, Right = Below Yellow) */}
+            <div
+              style={{ height: '64px', minHeight: '64px', maxHeight: '64px' }}
+              className="w-full max-w-[600px] flex items-center justify-between px-6"
+            >
               {/* Left slot: Directly below Blue quadrant */}
-              <div className="w-[45%] flex items-center justify-center">
+              <div className="w-[45%] flex items-center justify-center h-full">
                 {isBlueActive && activePlayer && (
                   <Dice
                     color="blue"
@@ -229,7 +243,7 @@ export const App: React.FC = () => {
               </div>
 
               {/* Right slot: Directly below Yellow quadrant */}
-              <div className="w-[45%] flex items-center justify-center">
+              <div className="w-[45%] flex items-center justify-center h-full">
                 {isYellowActive && activePlayer && (
                   <Dice
                     color="yellow"
@@ -243,37 +257,33 @@ export const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Bottom Players Row (Blue & Yellow) */}
-            <div className="w-full grid grid-cols-2 gap-2 max-w-[600px]">
-              {gameState.players[3] ? (
-                <PlayerCard
-                  player={gameState.players[3]}
-                  isActive={gameState.activePlayerIndex === 3}
-                  isLocal={localPlayer?.id === gameState.players[3].id}
-                  turnTimeRemaining={gameState.turnTimeRemaining}
-                  maxTurnTime={gameState.settings.turnTimerSeconds}
-                />
-              ) : gameState.players[2] && gameState.players.length === 3 ? (
-                <PlayerCard
-                  player={gameState.players[2]}
-                  isActive={gameState.activePlayerIndex === 2}
-                  isLocal={localPlayer?.id === gameState.players[2].id}
-                  turnTimeRemaining={gameState.turnTimeRemaining}
-                  maxTurnTime={gameState.settings.turnTimerSeconds}
-                />
-              ) : (
-                <div />
-              )}
-
-              {gameState.players[2] && gameState.players.length === 4 && (
-                <PlayerCard
-                  player={gameState.players[2]}
-                  isActive={gameState.activePlayerIndex === 2}
-                  isLocal={localPlayer?.id === gameState.players[2].id}
-                  turnTimeRemaining={gameState.turnTimeRemaining}
-                  maxTurnTime={gameState.settings.turnTimerSeconds}
-                />
-              )}
+            {/* Bottom Players Row (Blue = Left, Yellow = Right) */}
+            <div
+              style={{ height: '44px', minHeight: '44px', maxHeight: '44px' }}
+              className="w-full grid grid-cols-2 gap-2 max-w-[600px]"
+            >
+              <div className="h-full flex items-center">
+                {gameState.players.find((p) => p.color === 'blue') && (
+                  <PlayerCard
+                    player={gameState.players.find((p) => p.color === 'blue')!}
+                    isActive={activePlayer?.color === 'blue'}
+                    isLocal={localPlayer?.color === 'blue'}
+                    turnTimeRemaining={gameState.turnTimeRemaining}
+                    maxTurnTime={gameState.settings.turnTimerSeconds}
+                  />
+                )}
+              </div>
+              <div className="h-full flex items-center">
+                {gameState.players.find((p) => p.color === 'yellow') && (
+                  <PlayerCard
+                    player={gameState.players.find((p) => p.color === 'yellow')!}
+                    isActive={activePlayer?.color === 'yellow'}
+                    isLocal={localPlayer?.color === 'yellow'}
+                    turnTimeRemaining={gameState.turnTimeRemaining}
+                    maxTurnTime={gameState.settings.turnTimerSeconds}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Emoji Reaction Bar */}

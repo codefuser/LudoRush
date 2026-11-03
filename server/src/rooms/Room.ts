@@ -280,6 +280,13 @@ export class Room {
     return res;
   }
 
+  public advanceTurn(): void {
+    if (this.engine && this.status === 'PLAYING') {
+      this.engine.advanceTurn();
+      this.startTurnTimer();
+    }
+  }
+
   public moveToken(playerId: string, tokenId: number): MoveResult {
     if (!this.engine) return { success: false, error: 'Game not running' };
     const activePlayer = this.engine.getActivePlayer();

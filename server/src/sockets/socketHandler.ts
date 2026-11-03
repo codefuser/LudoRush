@@ -225,6 +225,30 @@ export function registerSocketHandlers(
       });
 
       io.to(room.id).emit('game:state', { state: room.getGameState() });
+
+      // Scenario A: Exactly 1 token can legally move -> auto-move after 800ms
+      if (res.hasMoves && res.legalTokens && res.legalTokens.length === 1) {
+        const singleTokenId = res.legalTokens[0];
+        setTimeout(() => {
+          if (room.status === 'PLAYING') {
+            const curState = room.getGameState();
+            // Check move is still pending and token is still eligible
+            if (curState.awaitingMove && curState.legalTokenIndices.includes(singleTokenId)) {
+              room.moveToken(playerId, singleTokenId);
+            }
+          }
+        }, 800);
+      }
+
+      // Scenario B: No legal moves (or 3 sixes cancel) -> show rolled dice for 1.2s then advance turn
+      if ((!res.hasMoves && res.roll !== 6) || res.turnCancelled) {
+        setTimeout(() => {
+          if (room.status === 'PLAYING') {
+            room.advanceTurn();
+            io.to(room.id).emit('game:state', { state: room.getGameState() });
+          }
+        }, 1200);
+      }
     });
 
     // 10. Move Token
