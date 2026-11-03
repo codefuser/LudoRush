@@ -101,6 +101,7 @@ export const App: React.FC = () => {
         {!gameState ? (
           <HomeView
             initialRoomCode={inviteCode}
+            connected={connected}
             onCreateRoom={(name, settings) => createRoom(name, settings)}
             onJoinRoom={(code, name) => joinRoom(code, name)}
           />

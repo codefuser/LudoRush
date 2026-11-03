@@ -15,12 +15,14 @@ interface HomeViewProps {
   onCreateRoom: (playerName: string, settings?: Partial<RoomSettings>) => void;
   onJoinRoom: (roomCode: string, playerName: string) => void;
   initialRoomCode?: string;
+  connected?: boolean;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
   onCreateRoom,
   onJoinRoom,
   initialRoomCode = '',
+  connected = true,
 }) => {
   const [tab, setTab] = useState<'create' | 'join'>(initialRoomCode ? 'join' : 'create');
   const [playerName, setPlayerName] = useState(() => {
@@ -65,7 +67,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto p-4 sm:p-6 flex flex-col items-center justify-center min-h-[85vh]">
+    <div className="w-full max-w-md mx-auto p-4 sm:p-6 flex flex-col items-center justify-center min-h-[85vh]">
       {/* Brand Logo & Title with 4 Ludo Colors */}
       <div className="flex flex-col items-center text-center mb-8">
         <div className="relative mb-4">
@@ -165,10 +167,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
             <button
               type="submit"
-              className="mt-2 ludo-cta-button"
+              disabled={!connected}
+              className={`mt-2 ludo-cta-button flex items-center justify-center gap-2 ${!connected ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              <Sparkles size={18} /> Create Private Room
+              {connected ? (
+                <>
+                  <Sparkles size={18} /> <span>Create Private Room</span>
+                </>
+              ) : (
+                <>
+                  <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin mr-1" />
+                  <span>Connecting to Server...</span>
+                </>
+              )}
             </button>
+            {!connected && (
+              <p className="text-[11px] text-amber-400/90 text-center -mt-1 font-medium animate-pulse">
+                Connecting to multiplayer backend...
+              </p>
+            )}
           </form>
         ) : (
           <form onSubmit={handleJoin} className="flex flex-col gap-5">
@@ -202,11 +219,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
             <button
               type="submit"
-              disabled={!roomCode.trim()}
-              className="mt-2 ludo-cta-button"
+              disabled={!connected || !roomCode.trim()}
+              className={`mt-2 ludo-cta-button flex items-center justify-center gap-2 ${!connected || !roomCode.trim() ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              Join Game <ArrowRight size={18} />
+              {connected ? (
+                <>
+                  <span>Join Game</span> <ArrowRight size={18} />
+                </>
+              ) : (
+                <>
+                  <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin mr-1" />
+                  <span>Connecting to Server...</span>
+                </>
+              )}
             </button>
+            {!connected && (
+              <p className="text-[11px] text-amber-400/90 text-center -mt-1 font-medium animate-pulse">
+                Connecting to multiplayer backend...
+              </p>
+            )}
           </form>
         )}
       </div>

@@ -46,25 +46,34 @@ export function useMultiplayer() {
 
   // Initialize socket
   useEffect(() => {
-    // If running in production (e.g. Vercel) and VITE_SERVER_URL is not set, fallback directly to Render production backend
-    const serverUrl =
-      import.meta.env.VITE_SERVER_URL ||
-      (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
-        ? 'https://ludorush.onrender.com'
-        : undefined);
+    // Sanitize any environment variable or URL
+    const rawEnv = import.meta.env.VITE_SERVER_URL;
+    const cleanEnv = typeof rawEnv === 'string' ? rawEnv.trim() : '';
+
+    const isLocalhost =
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+    // On localhost, allow undefined if no VITE_SERVER_URL is provided (uses Vite proxy /api and /socket.io)
+    // On production (e.g. Vercel deployment), always connect directly to the Render live backend URL!
+    const serverUrl = isLocalhost
+      ? (cleanEnv || undefined)
+      : (cleanEnv || 'https://ludorush.onrender.com');
 
     console.log('[LudoRush] Connecting to multiplayer server:', serverUrl || 'local origin proxy');
 
     const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(serverUrl, {
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
       autoConnect: true,
       reconnectionAttempts: 30,
       reconnectionDelay: 1000,
+      timeout: 20000,
     });
 
     socketRef.current = socket;
 
     socket.on('connect', () => {
+      console.log('[LudoRush] Socket connected successfully! ID:', socket.id);
       setConnected(true);
       setError(null);
 
@@ -97,8 +106,13 @@ export function useMultiplayer() {
       }
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
+      console.warn('[LudoRush] Socket disconnected:', reason);
       setConnected(false);
+    });
+
+    socket.on('connect_error', (err) => {
+      console.error('[LudoRush] Socket connection error:', err.message);
     });
 
     // Session init: save reconnect credentials
