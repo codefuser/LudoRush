@@ -46,13 +46,19 @@ export function useMultiplayer() {
 
   // Initialize socket
   useEffect(() => {
-    const serverUrl = import.meta.env.VITE_SERVER_URL || undefined;
-    console.log('[LudoRush] Connecting to multiplayer server:', serverUrl || window.location.origin);
+    // If running in production (e.g. Vercel) and VITE_SERVER_URL is not set, fallback directly to Render production backend
+    const serverUrl =
+      import.meta.env.VITE_SERVER_URL ||
+      (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+        ? 'https://ludorush.onrender.com'
+        : undefined);
+
+    console.log('[LudoRush] Connecting to multiplayer server:', serverUrl || 'local origin proxy');
 
     const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(serverUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
-      reconnectionAttempts: 20,
+      reconnectionAttempts: 30,
       reconnectionDelay: 1000,
     });
 
