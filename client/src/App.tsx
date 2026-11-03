@@ -53,8 +53,11 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-between relative overflow-hidden bg-[#0B0F19] text-slate-100">
-      {/* Background ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-600/10 blur-[120px] pointer-events-none rounded-full" />
+      {/* Background atmospheric ambient glows in 4 Ludo colors */}
+      <div className="absolute -top-24 -left-24 w-[500px] h-[500px] bg-red-600/15 blur-[140px] pointer-events-none rounded-full" />
+      <div className="absolute -top-24 -right-24 w-[500px] h-[500px] bg-emerald-600/15 blur-[140px] pointer-events-none rounded-full" />
+      <div className="absolute -bottom-24 -left-24 w-[500px] h-[500px] bg-blue-600/15 blur-[140px] pointer-events-none rounded-full" />
+      <div className="absolute -bottom-24 -right-24 w-[500px] h-[500px] bg-amber-500/15 blur-[140px] pointer-events-none rounded-full" />
 
       {/* Global Header */}
       <Header

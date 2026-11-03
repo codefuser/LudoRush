@@ -60,6 +60,8 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
+  background: transparent;
+  color: inherit;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -69,6 +71,159 @@ button:active {
 
 input[type="text"] {
   font-family: var(--font-body);
+  background: transparent;
+  color: inherit;
+}
+
+/* Premium Ludo UI Components */
+.ludo-hero-card {
+  background: linear-gradient(180deg, rgba(20, 29, 50, 0.85) 0%, rgba(12, 18, 33, 0.95) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.ludo-tab-bar {
+  display: flex;
+  background: rgba(8, 12, 22, 0.85);
+  padding: 6px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 6px;
+}
+
+.ludo-tab-item {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #94A3B8;
+  background: transparent;
+  transition: all 0.25s ease;
+}
+
+.ludo-tab-item:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ludo-tab-item.active {
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #06B6D4, #2563EB);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+.ludo-input-field {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(8, 12, 22, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ludo-input-field:focus {
+  border-color: #22D3EE;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ludo-input-field::placeholder {
+  color: #64748B;
+}
+
+.ludo-chip-group {
+  display: flex;
+  gap: 8px;
+}
+
+.ludo-chip {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #94A3B8;
+  background: rgba(8, 12, 22, 0.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+}
+
+.ludo-chip:hover {
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.ludo-chip.active {
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #0891B2, #0284C7);
+  border-color: #38BDF8;
+  box-shadow: 0 0 16px rgba(14, 165, 233, 0.35);
+}
+
+.ludo-cta-button {
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #06B6D4 0%, #2563EB 50%, #4F46E5 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 25px rgba(6, 182, 212, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ludo-cta-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(6, 182, 212, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.ludo-cta-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ludo-cta-button:disabled {
+  background: rgba(30, 41, 59, 0.7);
+  color: #64748B;
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.ludo-pill-btn {
+  padding: 10px 22px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #CBD5E1;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.ludo-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
 /* Glassmorphism utilities */
