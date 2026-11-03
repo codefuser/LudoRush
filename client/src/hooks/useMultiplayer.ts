@@ -46,7 +46,8 @@ export function useMultiplayer() {
 
   // Initialize socket
   useEffect(() => {
-    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io({
+    const serverUrl = (import.meta as any).env?.VITE_SERVER_URL || undefined;
+    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(serverUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnectionAttempts: 15,
