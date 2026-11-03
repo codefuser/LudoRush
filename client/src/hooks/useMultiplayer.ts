@@ -12,11 +12,23 @@ import { sounds } from '../game/soundEffects.js';
 
 const SESSION_STORAGE_KEY = 'ludo_rush_session';
 
+export interface ReactionParticle {
+  id: number;
+  rx: number;
+  ry: number;
+  scale: number;
+  rot: number;
+  delay: number;
+  size: number;
+}
+
 export interface FloatingReaction {
   id: string;
   emoji: string;
   playerName: string;
   playerColor: PlayerColor;
+  targetColor?: PlayerColor;
+  particles: ReactionParticle[];
   timestamp: number;
 }
 
@@ -189,24 +201,56 @@ export function useMultiplayer() {
       setGameState(state);
     });
 
-    socket.on('game:reaction', (reaction: { playerId: string; playerName: string; playerColor: PlayerColor; emoji: string }) => {
+    socket.on('game:turn-changed', ({ timeRemaining }: { activePlayerColor: PlayerColor; timeRemaining: number }) => {
+      setGameState((prev) => (prev ? { ...prev, turnTimeRemaining: timeRemaining } : prev));
+    });
+
+    socket.on('game:reaction', (reaction: { playerId: string; playerName: string; playerColor: PlayerColor; emoji: string; targetColor?: PlayerColor }) => {
+      const count = reaction.emoji === '🔥' ? 14 : 12;
+      const particles: ReactionParticle[] = Array.from({ length: count }).map((_, i) => ({
+        id: i,
+        rx: (Math.random() - 0.5) * 160,
+        ry: -(40 + Math.random() * 120),
+        scale: 0.8 + Math.random() * 0.7,
+        rot: (Math.random() - 0.5) * 50,
+        delay: Math.random() * 220,
+        size: Math.round(22 + Math.random() * 14),
+      }));
+
       const newReaction: FloatingReaction = {
         id: Math.random().toString(36).substring(2, 9),
         emoji: reaction.emoji,
         playerName: reaction.playerName,
         playerColor: reaction.playerColor,
+        targetColor: reaction.targetColor,
+        particles,
         timestamp: Date.now(),
       };
-      setReactions((prev) => [...prev.slice(-10), newReaction]);
+      setReactions((prev) => [...prev.slice(-6), newReaction]);
       setTimeout(() => {
         setReactions((prev) => prev.filter((r) => r.id !== newReaction.id));
-      }, 2000);
+      }, 2500);
     });
 
     return () => {
       socket.disconnect();
     };
   }, []);
+
+  // Smooth local 1-second countdown tick for turn timer
+  useEffect(() => {
+    if (!gameState || gameState.status !== 'PLAYING') return;
+    if (gameState.settings.turnTimerSeconds <= 0) return;
+
+    const interval = setInterval(() => {
+      setGameState((prev) => {
+        if (!prev || prev.status !== 'PLAYING' || prev.turnTimeRemaining <= 0) return prev;
+        return { ...prev, turnTimeRemaining: Math.max(0, prev.turnTimeRemaining - 1) };
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameState?.turnVersion, gameState?.status, gameState?.activePlayerIndex]);
 
   const createRoom = useCallback(
     (playerName: string, settings?: Partial<RoomSettings>) => {
@@ -289,9 +333,9 @@ export function useMultiplayer() {
     }
   }, []);
 
-  const sendReaction = useCallback((emoji: string) => {
+  const sendReaction = useCallback((emoji: string, targetColor?: PlayerColor) => {
     if (socketRef.current) {
-      socketRef.current.emit('game:reaction', { emoji });
+      socketRef.current.emit('game:reaction', { emoji, targetColor });
     }
   }, []);
 

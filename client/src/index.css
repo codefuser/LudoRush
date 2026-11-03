@@ -97,8 +97,11 @@ input[type="text"] {
   height: 100%;
   border-radius: 12px;
   background: linear-gradient(145deg, #FFFFFF 0%, #F1F5F9 50%, #E2E8F0 100%);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.25);
+  border: none;
+  outline: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1), 0 3px 8px rgba(0, 0, 0, 0.25);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
@@ -629,16 +632,74 @@ input[type="text"] {
 }
 
 .board-container {
-  width: min(88vw, 76vh, 600px);
+  width: min(92vw, calc(100dvh - 300px), 480px);
   aspect-ratio: 1 / 1;
   position: relative;
   margin: 0 auto;
 }
 
-@media (max-width: 640px) {
+@media (max-height: 720px) {
   .board-container {
-    width: min(96vw, 96vw, 460px);
+    width: min(90vw, calc(100dvh - 250px), 400px);
   }
+}
+
+@media (max-height: 600px) {
+  .board-container {
+    width: min(86vw, calc(100dvh - 200px), 330px);
+  }
+}
+
+@keyframes reaction-burst-fire {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(var(--rx, 0px), -35px) scale(1.4) rotate(var(--rrot, 0deg));
+    filter: drop-shadow(0 0 10px #f97316);
+  }
+  70% {
+    opacity: 0.95;
+    transform: translate(calc(var(--rx, 0px) * 1.5), -140px) scale(1) rotate(calc(var(--rrot, 0deg) * 1.5));
+    filter: drop-shadow(0 0 14px #ea580c);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--rx, 0px) * 2), -220px) scale(0.5) rotate(calc(var(--rrot, 0deg) * 2));
+  }
+}
+
+@keyframes reaction-burst-laugh {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(var(--rx, 0px), -30px) scale(1.4) rotate(var(--rrot, 0deg));
+  }
+  50% {
+    transform: translate(calc(var(--rx, 0px) * 1.2), -90px) scale(1.1) rotate(calc(var(--rrot, 0deg) * -1));
+  }
+  80% {
+    opacity: 0.9;
+    transform: translate(calc(var(--rx, 0px) * 1.5), -160px) scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--rx, 0px) * 1.8), -220px) scale(0.5);
+  }
+}
+
+.reaction-particle {
+  position: absolute;
+  pointer-events: none;
+  animation-duration: 2.2s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes float-up-fade {

@@ -124,7 +124,7 @@ export const LudoBoard: React.FC<LudoBoardProps> = ({
           onMoveAnimationComplete(finalState);
         }
       }
-    }, 110);
+    }, 75);
 
     return () => {
       clearInterval(hopInterval);

@@ -134,16 +134,14 @@ export const Dice: React.FC<DiceProps> = ({
     <div
       onClick={handleClick}
       title={canRoll ? 'Click to Roll Dice!' : `${config.name} Dice`}
-      className="relative select-none flex items-center justify-center"
+      className="relative select-none inline-flex items-center gap-2"
       style={{
-        width: `${size + 14}px`,
-        height: `${size + 14}px`,
         cursor: canRoll && !isRolling ? 'pointer' : 'default',
       }}
     >
       {/* 3D Scene Viewport */}
       <div
-        className="dice-3d-scene"
+        className="dice-3d-scene shrink-0"
         style={{
           width: `${size}px`,
           height: `${size}px`,
@@ -213,10 +211,10 @@ export const Dice: React.FC<DiceProps> = ({
         </div>
       </div>
 
-      {/* Floating Prompt Pill */}
+      {/* Side Prompt Pill (Placed beside dice - NEVER overlaps dice face!) */}
       {canRoll && !isRolling && (
         <span
-          className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white shadow-lg pointer-events-none whitespace-nowrap animate-bounce"
+          className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white shadow-lg pointer-events-none whitespace-nowrap animate-pulse shrink-0"
           style={{
             backgroundColor: config.hex,
             boxShadow: `0 0 10px ${config.hex}`,

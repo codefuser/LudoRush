@@ -34,7 +34,7 @@ export interface ClientToServerEvents {
 
   'game:rematch': () => void;
 
-  'game:reaction': (payload: { emoji: string }) => void;
+  'game:reaction': (payload: { emoji: string; targetColor?: PlayerColor }) => void;
 
   'session:reconnect': (
     payload: {
@@ -92,6 +92,7 @@ export interface ServerToClientEvents {
     playerName: string;
     playerColor: PlayerColor;
     emoji: string;
+    targetColor?: PlayerColor;
   }) => void;
   'player:connected': (payload: { playerId: string; color: PlayerColor }) => void;
   'player:disconnected': (payload: { playerId: string; color: PlayerColor }) => void;

@@ -226,18 +226,41 @@ export function registerSocketHandlers(
 
       io.to(room.id).emit('game:state', { state: room.getGameState() });
 
-      // Scenario A: Exactly 1 token can legally move -> auto-move after 800ms
-      if (res.hasMoves && res.legalTokens && res.legalTokens.length === 1) {
-        const singleTokenId = res.legalTokens[0];
+      // Scenario A: Auto-move if:
+      // 1) Exactly 1 legal token can move, OR
+      // 2) All legal tokens share the identical current position (e.g. 2 tokens stacked on the same spot)
+      let shouldAutoMove = false;
+      let autoTokenId: number | undefined;
+
+      if (res.hasMoves && res.legalTokens && res.legalTokens.length > 0) {
+        if (res.legalTokens.length === 1) {
+          shouldAutoMove = true;
+          autoTokenId = res.legalTokens[0];
+        } else {
+          // Check if all eligible tokens are at the exact same step
+          const eligibleTokens = rollingPlayer.tokens.filter((t) => res.legalTokens!.includes(t.id));
+          if (eligibleTokens.length > 0) {
+            const firstStep = eligibleTokens[0].step;
+            const allSameSpot = eligibleTokens.every((t) => t.step === firstStep);
+            if (allSameSpot) {
+              shouldAutoMove = true;
+              autoTokenId = eligibleTokens[0].id;
+            }
+          }
+        }
+      }
+
+      if (shouldAutoMove && autoTokenId !== undefined) {
+        const targetId = autoTokenId;
         setTimeout(() => {
           if (room.status === 'PLAYING') {
             const curState = room.getGameState();
             // Check move is still pending and token is still eligible
-            if (curState.awaitingMove && curState.legalTokenIndices.includes(singleTokenId)) {
-              room.moveToken(playerId, singleTokenId);
+            if (curState.awaitingMove && curState.legalTokenIndices.includes(targetId)) {
+              room.moveToken(playerId, targetId);
             }
           }
-        }, 800);
+        }, 450); // Fast, responsive 450ms delay
       }
 
       // Scenario B: No legal moves (or 3 sixes cancel) -> show rolled dice for 1.2s then advance turn
@@ -274,8 +297,8 @@ export function registerSocketHandlers(
       }
     });
 
-    // 12. Emoji Reactions
-    socket.on('game:reaction', ({ emoji }) => {
+    // 12. Emoji Reactions (General or Targeted at a player)
+    socket.on('game:reaction', ({ emoji, targetColor }) => {
       const context = roomManager.getRoomForSocket(socket.id);
       if (!context) return;
       const { room, playerId } = context;
@@ -287,6 +310,7 @@ export function registerSocketHandlers(
         playerName: part.player.name,
         playerColor: part.player.color,
         emoji,
+        targetColor,
       });
     });
 

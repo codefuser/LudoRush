@@ -52,7 +52,7 @@ export const App: React.FC = () => {
   const isYellowActive = activePlayer?.color === 'yellow';
 
   return (
-    <div className="min-h-screen flex flex-col justify-between relative overflow-hidden bg-[#0B0F19] text-slate-100">
+    <div className={`flex flex-col justify-between relative overflow-hidden bg-[#0B0F19] text-slate-100 select-none ${gameState && gameState.status === 'PLAYING' ? 'h-[100dvh] max-h-[100dvh]' : 'min-h-screen'}`}>
       {/* Background atmospheric ambient glows in 4 Ludo colors */}
       <div className="absolute -top-24 -left-24 w-[500px] h-[500px] bg-red-600/15 blur-[140px] pointer-events-none rounded-full" />
       <div className="absolute -top-24 -right-24 w-[500px] h-[500px] bg-emerald-600/15 blur-[140px] pointer-events-none rounded-full" />
@@ -80,24 +80,53 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Reactions on Screen */}
-      <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
-        {reactions.map((r) => (
-          <div
-            key={r.id}
-            className="floating-reaction"
-            style={{
-              left: `${35 + Math.random() * 30}%`,
-              bottom: '25%',
-            }}
-          >
-            {r.emoji}
-          </div>
-        ))}
+      {/* Floating Animated Multi-Particle Reaction Bursts */}
+      <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+        {reactions.map((r) => {
+          const targetPos =
+            r.targetColor === 'red'
+              ? { left: '22%', top: '22%' }
+              : r.targetColor === 'green'
+              ? { left: '78%', top: '22%' }
+              : r.targetColor === 'blue'
+              ? { left: '22%', top: '78%' }
+              : r.targetColor === 'yellow'
+              ? { left: '78%', top: '78%' }
+              : { left: '50%', bottom: '22%' };
+
+          return (
+            <div
+              key={r.id}
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+              style={targetPos}
+            >
+              <div className="text-[10px] font-black text-amber-300 bg-slate-950/90 px-2 py-0.5 rounded-full mb-1 border border-amber-500/30 shadow whitespace-nowrap text-center animate-fade-in">
+                {r.playerName} {r.targetColor ? `➔ ${r.targetColor}` : ''}
+              </div>
+              <div className="relative w-8 h-8 flex items-center justify-center">
+                {r.particles?.map((p) => (
+                  <span
+                    key={p.id}
+                    className="reaction-particle"
+                    style={{
+                      '--rx': `${p.rx}px`,
+                      '--rrot': `${p.rot}deg`,
+                      animationName: r.emoji === '😂' ? 'reaction-burst-laugh' : 'reaction-burst-fire',
+                      animationDelay: `${p.delay}ms`,
+                      fontSize: `${p.size}px`,
+                    } as React.CSSProperties}
+                  >
+                    {r.emoji}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 z-10 w-full">
+      <main className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 z-10 w-full overflow-hidden">
         {!gameState ? (
           <HomeView
             initialRoomCode={inviteCode}
@@ -116,19 +145,30 @@ export const App: React.FC = () => {
             onLeaveRoom={leaveRoom}
           />
         ) : (
-          /* Live Game Screen */
-          <div className="w-full max-w-4xl flex flex-col items-center gap-2">
+          /* Live Game Screen (Strict zero-scroll viewport fit) */
+          <div className="w-full max-w-4xl flex flex-col items-center gap-1 sm:gap-1.5 h-full justify-center">
             {/* Top Status & Turn Bar */}
             <div
-              style={{ minHeight: '40px' }}
-              className="w-full max-w-[600px] glass-panel px-3 py-2 flex items-center justify-between gap-1.5"
+              style={{ minHeight: '36px', height: '36px' }}
+              className="w-full max-w-[600px] glass-panel px-3 py-1 flex items-center justify-between gap-2 shrink-0"
             >
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-400">
-                  Current Turn:
-                </span>
+              {/* Left: Active turn indicator */}
+              <div className="flex items-center gap-2 shrink-0">
                 <span
-                  className="font-extrabold text-xs px-2.5 py-1 rounded-full text-white shadow-sm flex items-center gap-1.5"
+                  className="w-2 h-2 rounded-full animate-ping shrink-0"
+                  style={{
+                    backgroundColor:
+                      activePlayer?.color === 'red'
+                        ? '#F51F2B'
+                        : activePlayer?.color === 'green'
+                        ? '#08B84B'
+                        : activePlayer?.color === 'yellow'
+                        ? '#FFD817'
+                        : '#087CF0',
+                  }}
+                />
+                <span
+                  className="font-black text-xs px-2.5 py-0.5 rounded-full text-white shadow-sm flex items-center gap-1 shrink-0 font-display tracking-wide"
                   style={{
                     backgroundColor:
                       activePlayer?.color === 'red'
@@ -140,21 +180,20 @@ export const App: React.FC = () => {
                         : '#087CF0',
                   }}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                   {isMyTurn ? 'YOUR TURN 🎲' : `${activePlayer?.name}'s Turn`}
                 </span>
               </div>
 
-              {/* Action Prompt / Guide */}
-              <div className="text-xs text-slate-300 font-medium truncate text-right">
+              {/* Right: Last Action Message (clean badge) */}
+              <div className="text-[11px] text-slate-300 font-semibold truncate bg-slate-900/60 px-2.5 py-0.5 rounded-lg border border-slate-700/40 text-right">
                 {gameState.lastActionMessage || 'Game in progress...'}
               </div>
             </div>
 
             {/* Top Players Row (Red = Left, Green = Right) */}
             <div
-              style={{ height: '44px', minHeight: '44px', maxHeight: '44px' }}
-              className="w-full grid grid-cols-2 gap-2 max-w-[600px]"
+              style={{ height: '42px', minHeight: '42px', maxHeight: '42px' }}
+              className="w-full grid grid-cols-2 gap-2 max-w-[600px] shrink-0"
             >
               <div className="h-full flex items-center">
                 {gameState.players.find((p) => p.color === 'red') && (
@@ -164,6 +203,7 @@ export const App: React.FC = () => {
                     isLocal={localPlayer?.color === 'red'}
                     turnTimeRemaining={gameState.turnTimeRemaining}
                     maxTurnTime={gameState.settings.turnTimerSeconds}
+                    onReactToPlayer={(color, emoji) => sendReaction(emoji, color)}
                   />
                 )}
               </div>
@@ -175,18 +215,19 @@ export const App: React.FC = () => {
                     isLocal={localPlayer?.color === 'green'}
                     turnTimeRemaining={gameState.turnTimeRemaining}
                     maxTurnTime={gameState.settings.turnTimerSeconds}
+                    onReactToPlayer={(color, emoji) => sendReaction(emoji, color)}
                   />
                 )}
               </div>
             </div>
 
-            {/* TOP DICE TRAY (Fixed height 64px: Left = Above Red, Right = Above Green) */}
+            {/* TOP DICE TRAY (Fixed height 56px: Left = Above Red, Right = Above Green) */}
             <div
-              style={{ height: '64px', minHeight: '64px', maxHeight: '64px' }}
-              className="w-full max-w-[600px] flex items-center justify-between px-6"
+              style={{ height: '56px', minHeight: '56px', maxHeight: '56px' }}
+              className="w-full max-w-[600px] flex items-center justify-between px-6 shrink-0"
             >
               {/* Left slot: Directly above Red quadrant */}
-              <div className="w-[45%] flex items-center justify-center h-full">
+              <div className="w-[48%] flex items-center justify-center h-full">
                 {isRedActive && activePlayer && (
                   <Dice
                     color="red"
@@ -194,13 +235,13 @@ export const App: React.FC = () => {
                     isRolling={isRolling}
                     canRoll={canRoll}
                     onRoll={rollDice}
-                    size={52}
+                    size={48}
                   />
                 )}
               </div>
 
               {/* Right slot: Directly above Green quadrant */}
-              <div className="w-[45%] flex items-center justify-center h-full">
+              <div className="w-[48%] flex items-center justify-center h-full">
                 {isGreenActive && activePlayer && (
                   <Dice
                     color="green"
@@ -208,7 +249,7 @@ export const App: React.FC = () => {
                     isRolling={isRolling}
                     canRoll={canRoll}
                     onRoll={rollDice}
-                    size={52}
+                    size={48}
                   />
                 )}
               </div>
@@ -223,13 +264,13 @@ export const App: React.FC = () => {
               onMoveToken={moveToken}
             />
 
-            {/* BOTTOM DICE TRAY (Fixed height 64px: Left = Below Blue, Right = Below Yellow) */}
+            {/* BOTTOM DICE TRAY (Fixed height 56px: Left = Below Blue, Right = Below Yellow) */}
             <div
-              style={{ height: '64px', minHeight: '64px', maxHeight: '64px' }}
-              className="w-full max-w-[600px] flex items-center justify-between px-6"
+              style={{ height: '56px', minHeight: '56px', maxHeight: '56px' }}
+              className="w-full max-w-[600px] flex items-center justify-between px-6 shrink-0"
             >
               {/* Left slot: Directly below Blue quadrant */}
-              <div className="w-[45%] flex items-center justify-center h-full">
+              <div className="w-[48%] flex items-center justify-center h-full">
                 {isBlueActive && activePlayer && (
                   <Dice
                     color="blue"
@@ -237,13 +278,13 @@ export const App: React.FC = () => {
                     isRolling={isRolling}
                     canRoll={canRoll}
                     onRoll={rollDice}
-                    size={52}
+                    size={48}
                   />
                 )}
               </div>
 
               {/* Right slot: Directly below Yellow quadrant */}
-              <div className="w-[45%] flex items-center justify-center h-full">
+              <div className="w-[48%] flex items-center justify-center h-full">
                 {isYellowActive && activePlayer && (
                   <Dice
                     color="yellow"
@@ -251,7 +292,7 @@ export const App: React.FC = () => {
                     isRolling={isRolling}
                     canRoll={canRoll}
                     onRoll={rollDice}
-                    size={52}
+                    size={48}
                   />
                 )}
               </div>
@@ -259,8 +300,8 @@ export const App: React.FC = () => {
 
             {/* Bottom Players Row (Blue = Left, Yellow = Right) */}
             <div
-              style={{ height: '44px', minHeight: '44px', maxHeight: '44px' }}
-              className="w-full grid grid-cols-2 gap-2 max-w-[600px]"
+              style={{ height: '42px', minHeight: '42px', maxHeight: '42px' }}
+              className="w-full grid grid-cols-2 gap-2 max-w-[600px] shrink-0"
             >
               <div className="h-full flex items-center">
                 {gameState.players.find((p) => p.color === 'blue') && (
@@ -270,6 +311,7 @@ export const App: React.FC = () => {
                     isLocal={localPlayer?.color === 'blue'}
                     turnTimeRemaining={gameState.turnTimeRemaining}
                     maxTurnTime={gameState.settings.turnTimerSeconds}
+                    onReactToPlayer={(color, emoji) => sendReaction(emoji, color)}
                   />
                 )}
               </div>
@@ -281,6 +323,7 @@ export const App: React.FC = () => {
                     isLocal={localPlayer?.color === 'yellow'}
                     turnTimeRemaining={gameState.turnTimeRemaining}
                     maxTurnTime={gameState.settings.turnTimerSeconds}
+                    onReactToPlayer={(color, emoji) => sendReaction(emoji, color)}
                   />
                 )}
               </div>

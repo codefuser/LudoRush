@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX, LogOut, Copy, Check, Gamepad2 } from 'lucide-react';
+import { Volume2, VolumeX, LogOut, Copy, Check } from 'lucide-react';
 import { sounds } from '../../game/soundEffects.js';
 
 interface HeaderProps {
@@ -26,14 +26,21 @@ export const Header: React.FC<HeaderProps> = ({ roomCode, connected, onLeave }) 
   };
 
   return (
-    <header className="w-full max-w-5xl mx-auto px-4 py-3 flex items-center justify-between z-20">
-      {/* Brand logo */}
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white shadow-md">
-          <Gamepad2 size={18} />
+    <header className="w-full max-w-5xl mx-auto px-3 py-2 flex items-center justify-between z-20 shrink-0">
+      {/* Brand logo: 4 Ludo colored dots in rounded cube */}
+      <div className="flex items-center gap-2 select-none">
+        <div className="w-7 h-7 rounded-lg p-0.5 bg-gradient-to-tr from-rose-500 via-amber-400 to-cyan-400 shadow-md flex items-center justify-center">
+          <div className="w-full h-full rounded-[6px] bg-slate-950 flex items-center justify-center">
+            <div className="grid grid-cols-2 gap-1 p-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#F51F2B]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#08B84B]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#087CF0]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#FFD817]" />
+            </div>
+          </div>
         </div>
-        <span className="font-extrabold text-base tracking-tight text-white font-display hidden sm:inline">
-          Ludo <span className="text-cyan-400">Rush</span>
+        <span className="font-black text-sm tracking-tight text-white font-display">
+          LUDO <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">RUSH</span>
         </span>
       </div>
 
@@ -42,19 +49,19 @@ export const Header: React.FC<HeaderProps> = ({ roomCode, connected, onLeave }) 
         <button
           onClick={copyCode}
           title="Click to copy room code"
-          className="glass-pill px-3 py-1 flex items-center gap-2 text-xs font-mono font-bold text-slate-200 hover:text-white hover:border-slate-500 transition-colors"
+          className="glass-pill px-2.5 py-1 flex items-center gap-1.5 text-xs font-mono font-bold text-slate-200 hover:text-white hover:border-slate-500 transition-colors"
         >
-          <span className="text-[10px] text-slate-400 uppercase font-sans">Room:</span>
-          <span className="text-cyan-400 tracking-wider">{roomCode}</span>
-          {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+          <span className="text-[9px] text-slate-400 uppercase font-sans">Room:</span>
+          <span className="text-cyan-400 tracking-wider font-extrabold">{roomCode}</span>
+          {copied ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
         </button>
       )}
 
       {/* Controls & Connection Status */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         {/* Connection status indicator */}
         <span
-          className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full glass-pill"
+          className="flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full glass-pill"
           style={{ color: connected ? '#10B981' : '#F59E0B' }}
         >
           <span
@@ -68,9 +75,9 @@ export const Header: React.FC<HeaderProps> = ({ roomCode, connected, onLeave }) 
         <button
           onClick={toggleSound}
           title={muted ? 'Unmute Sound' : 'Mute Sound'}
-          className="p-2 rounded-xl glass-pill text-slate-300 hover:text-white transition-colors"
+          className="p-1.5 rounded-lg glass-pill text-slate-300 hover:text-white transition-colors"
         >
-          {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+          {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}
         </button>
 
         {/* Leave Room Button */}
@@ -82,9 +89,9 @@ export const Header: React.FC<HeaderProps> = ({ roomCode, connected, onLeave }) 
               }
             }}
             title="Leave Room"
-            className="p-2 rounded-xl glass-pill text-slate-400 hover:text-rose-400 transition-colors"
+            className="p-1.5 rounded-lg glass-pill text-slate-400 hover:text-rose-400 transition-colors"
           >
-            <LogOut size={16} />
+            <LogOut size={15} />
           </button>
         )}
       </div>
