@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX, LogOut, Copy, Check } from 'lucide-react';
+import { Volume2, VolumeX, LogOut, Copy, Check, Gamepad2 } from 'lucide-react';
 import { sounds } from '../../game/soundEffects.js';
 
 interface HeaderProps {
@@ -27,20 +27,13 @@ export const Header: React.FC<HeaderProps> = ({ roomCode, connected, onLeave }) 
 
   return (
     <header className="w-full max-w-5xl mx-auto px-3 py-2 flex items-center justify-between z-20 shrink-0">
-      {/* Brand logo: 4 Ludo colored dots in rounded cube */}
+      {/* Brand logo */}
       <div className="flex items-center gap-2 select-none">
-        <div className="w-7 h-7 rounded-lg p-0.5 bg-gradient-to-tr from-rose-500 via-amber-400 to-cyan-400 shadow-md flex items-center justify-center">
-          <div className="w-full h-full rounded-[6px] bg-slate-950 flex items-center justify-center">
-            <div className="grid grid-cols-2 gap-1 p-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#F51F2B]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#08B84B]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#087CF0]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#FFD817]" />
-            </div>
-          </div>
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-400 via-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/25 border border-cyan-300/30">
+          <Gamepad2 size={18} className="text-white drop-shadow" />
         </div>
-        <span className="font-black text-sm tracking-tight text-white font-display">
-          LUDO <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">RUSH</span>
+        <span className="font-black text-sm sm:text-base tracking-tight text-white font-display">
+          Ludo <span className="text-cyan-400">Rush</span>
         </span>
       </div>
 

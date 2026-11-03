@@ -9,6 +9,7 @@ interface DiceProps {
   canRoll: boolean;
   onRoll: () => void;
   size?: number;
+  align?: 'left' | 'right';
 }
 
 export const Dice: React.FC<DiceProps> = ({
@@ -18,6 +19,7 @@ export const Dice: React.FC<DiceProps> = ({
   canRoll,
   onRoll,
   size = 52,
+  align = 'left',
 }) => {
   const config = COLOR_CONFIG[color];
   const halfSize = size / 2;
@@ -134,7 +136,9 @@ export const Dice: React.FC<DiceProps> = ({
     <div
       onClick={handleClick}
       title={canRoll ? 'Click to Roll Dice!' : `${config.name} Dice`}
-      className="relative select-none inline-flex items-center gap-2"
+      className={`relative select-none inline-flex items-center gap-2.5 mx-2 ${
+        align === 'right' ? 'flex-row-reverse' : 'flex-row'
+      }`}
       style={{
         cursor: canRoll && !isRolling ? 'pointer' : 'default',
       }}

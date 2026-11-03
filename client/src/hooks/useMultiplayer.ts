@@ -206,15 +206,15 @@ export function useMultiplayer() {
     });
 
     socket.on('game:reaction', (reaction: { playerId: string; playerName: string; playerColor: PlayerColor; emoji: string; targetColor?: PlayerColor }) => {
-      const count = reaction.emoji === '🔥' ? 14 : 12;
+      const count = 16;
       const particles: ReactionParticle[] = Array.from({ length: count }).map((_, i) => ({
         id: i,
-        rx: (Math.random() - 0.5) * 160,
-        ry: -(40 + Math.random() * 120),
-        scale: 0.8 + Math.random() * 0.7,
-        rot: (Math.random() - 0.5) * 50,
-        delay: Math.random() * 220,
-        size: Math.round(22 + Math.random() * 14),
+        rx: (Math.random() - 0.5) * 220,
+        ry: -(140 + Math.random() * 160),
+        scale: 0.8 + Math.random() * 0.6,
+        rot: (Math.random() - 0.5) * 60,
+        delay: Math.round(i * 45 + Math.random() * 50),
+        size: Math.round(24 + Math.random() * 14),
       }));
 
       const newReaction: FloatingReaction = {
@@ -229,7 +229,7 @@ export function useMultiplayer() {
       setReactions((prev) => [...prev.slice(-6), newReaction]);
       setTimeout(() => {
         setReactions((prev) => prev.filter((r) => r.id !== newReaction.id));
-      }, 2500);
+      }, 2800);
     });
 
     return () => {

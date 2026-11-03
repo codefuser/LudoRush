@@ -93,7 +93,39 @@ export function registerSocketHandlers(
       }
 
       if (room.status !== 'LOBBY') {
-        return callback({ success: false, error: 'Game in this room has already started.' });
+        // In active game, check if this is an existing or disconnected participant rejoining with the room code!
+        const byName = room.findParticipantByName(cleanName);
+        const disconnectedPart = Array.from(room.getParticipants().values()).find((p) => !p.player.isConnected);
+        const existingPart = byName || disconnectedPart;
+
+        if (existingPart) {
+          // Re-attach socket to existing player!
+          existingPart.player.name = cleanName;
+          existingPart.player.isConnected = true;
+          room.updatePlayerSocket(existingPart.player.id, socket.id);
+          socket.join(room.id);
+          socket.emit('session:init', { playerId: existingPart.player.id, sessionToken: existingPart.sessionToken });
+
+          const state = room.getGameState();
+          socket.emit('room:joined', {
+            roomId: room.id,
+            roomCode: room.code,
+            player: existingPart.player,
+            state,
+          });
+          socket.emit('game:state', { state });
+
+          // Broadcast to other players in room
+          socket.to(room.id).emit('player:connected', {
+            playerId: existingPart.player.id,
+            color: existingPart.player.color,
+          });
+          io.to(room.id).emit('room:updated', { state });
+
+          return callback({ success: true, roomId: room.id });
+        }
+
+        return callback({ success: false, error: 'Game in this room has already started and is full.' });
       }
 
       const availableColors = room.getAvailableColors();

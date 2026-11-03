@@ -75,6 +75,20 @@ export class Room {
     return undefined;
   }
 
+  public getParticipants(): Map<string, RoomParticipant> {
+    return this.participants;
+  }
+
+  public findParticipantByName(name: string): RoomParticipant | undefined {
+    const clean = name.trim().toLowerCase();
+    for (const part of this.participants.values()) {
+      if (part.player.name.trim().toLowerCase() === clean) {
+        return part;
+      }
+    }
+    return undefined;
+  }
+
   public getPlayers(): Player[] {
     return Array.from(this.participants.values()).map((p) => p.player);
   }
@@ -111,6 +125,16 @@ export class Room {
   }
 
   public removePlayer(playerId: string): boolean {
+    if (this.status === 'PLAYING') {
+      // In active game, preserve the player seat and token positions so they can rejoin with room code!
+      const part = this.participants.get(playerId);
+      if (part) {
+        part.player.isConnected = false;
+        this.lastActiveAt = Date.now();
+      }
+      return true;
+    }
+
     const deleted = this.participants.delete(playerId);
     if (deleted && playerId === this.hostPlayerId) {
       const next = Array.from(this.participants.values()).find((p) => p.player.isConnected);

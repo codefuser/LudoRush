@@ -85,25 +85,29 @@ export const App: React.FC = () => {
         {reactions.map((r) => {
           const targetPos =
             r.targetColor === 'red'
-              ? { left: '22%', top: '22%' }
+              ? { left: '25%', top: '22%' }
               : r.targetColor === 'green'
-              ? { left: '78%', top: '22%' }
+              ? { left: '75%', top: '22%' }
               : r.targetColor === 'blue'
-              ? { left: '22%', top: '78%' }
+              ? { left: '25%', top: '78%' }
               : r.targetColor === 'yellow'
-              ? { left: '78%', top: '78%' }
-              : { left: '50%', bottom: '22%' };
+              ? { left: '75%', top: '78%' }
+              : { left: '50%', bottom: '15%' };
+
+          const animName =
+            r.emoji === '🔥'
+              ? 'reaction-fire-fountain'
+              : r.emoji === '😂'
+              ? 'reaction-laugh-fountain'
+              : 'reaction-fountain-default';
 
           return (
             <div
               key={r.id}
-              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
               style={targetPos}
             >
-              <div className="text-[10px] font-black text-amber-300 bg-slate-950/90 px-2 py-0.5 rounded-full mb-1 border border-amber-500/30 shadow whitespace-nowrap text-center animate-fade-in">
-                {r.playerName} {r.targetColor ? `➔ ${r.targetColor}` : ''}
-              </div>
-              <div className="relative w-8 h-8 flex items-center justify-center">
+              <div className="relative w-8 h-8 flex items-center justify-center pointer-events-none">
                 {r.particles?.map((p) => (
                   <span
                     key={p.id}
@@ -111,7 +115,7 @@ export const App: React.FC = () => {
                     style={{
                       '--rx': `${p.rx}px`,
                       '--rrot': `${p.rot}deg`,
-                      animationName: r.emoji === '😂' ? 'reaction-burst-laugh' : 'reaction-burst-fire',
+                      animationName: animName,
                       animationDelay: `${p.delay}ms`,
                       fontSize: `${p.size}px`,
                     } as React.CSSProperties}
@@ -224,10 +228,10 @@ export const App: React.FC = () => {
             {/* TOP DICE TRAY (Fixed height 56px: Left = Above Red, Right = Above Green) */}
             <div
               style={{ height: '56px', minHeight: '56px', maxHeight: '56px' }}
-              className="w-full max-w-[600px] flex items-center justify-between px-6 shrink-0"
+              className="w-full max-w-[600px] flex items-center justify-between px-3 sm:px-6 shrink-0"
             >
               {/* Left slot: Directly above Red quadrant */}
-              <div className="w-[48%] flex items-center justify-center h-full">
+              <div className="w-[48%] flex items-center justify-start px-2 h-full">
                 {isRedActive && activePlayer && (
                   <Dice
                     color="red"
@@ -236,12 +240,13 @@ export const App: React.FC = () => {
                     canRoll={canRoll}
                     onRoll={rollDice}
                     size={48}
+                    align="left"
                   />
                 )}
               </div>
 
-              {/* Right slot: Directly above Green quadrant */}
-              <div className="w-[48%] flex items-center justify-center h-full">
+              {/* Right slot: Directly above Green quadrant (Right aligned: [ROLL] [DICE]) */}
+              <div className="w-[48%] flex items-center justify-end px-2 h-full">
                 {isGreenActive && activePlayer && (
                   <Dice
                     color="green"
@@ -250,6 +255,7 @@ export const App: React.FC = () => {
                     canRoll={canRoll}
                     onRoll={rollDice}
                     size={48}
+                    align="right"
                   />
                 )}
               </div>
@@ -267,10 +273,10 @@ export const App: React.FC = () => {
             {/* BOTTOM DICE TRAY (Fixed height 56px: Left = Below Blue, Right = Below Yellow) */}
             <div
               style={{ height: '56px', minHeight: '56px', maxHeight: '56px' }}
-              className="w-full max-w-[600px] flex items-center justify-between px-6 shrink-0"
+              className="w-full max-w-[600px] flex items-center justify-between px-3 sm:px-6 shrink-0"
             >
               {/* Left slot: Directly below Blue quadrant */}
-              <div className="w-[48%] flex items-center justify-center h-full">
+              <div className="w-[48%] flex items-center justify-start px-2 h-full">
                 {isBlueActive && activePlayer && (
                   <Dice
                     color="blue"
@@ -279,12 +285,13 @@ export const App: React.FC = () => {
                     canRoll={canRoll}
                     onRoll={rollDice}
                     size={48}
+                    align="left"
                   />
                 )}
               </div>
 
-              {/* Right slot: Directly below Yellow quadrant */}
-              <div className="w-[48%] flex items-center justify-center h-full">
+              {/* Right slot: Directly below Yellow quadrant (Right aligned: [ROLL] [DICE]) */}
+              <div className="w-[48%] flex items-center justify-end px-2 h-full">
                 {isYellowActive && activePlayer && (
                   <Dice
                     color="yellow"
@@ -293,6 +300,7 @@ export const App: React.FC = () => {
                     canRoll={canRoll}
                     onRoll={rollDice}
                     size={48}
+                    align="right"
                   />
                 )}
               </div>
