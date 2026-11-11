@@ -37,16 +37,25 @@ function isThreatenedByOpponent(
   return false;
 }
 
+export type BotDifficulty = 'easy' | 'medium' | 'hard';
+
 /**
- * Picks the smartest legal token for an AI Computer player.
+ * Picks a legal token for an AI Computer player based on difficulty level.
  */
-export function chooseBestBotMove(state: GameState): number {
+export function chooseBestBotMove(
+  state: GameState,
+  difficulty: BotDifficulty = 'hard'
+): number {
   const activePlayer = state.players[state.activePlayerIndex];
   const legal = state.legalTokenIndices;
   const roll = state.currentRoll ?? 0;
 
   if (!activePlayer || legal.length === 0) return 0;
   if (legal.length === 1) return legal[0];
+
+  if (difficulty === 'easy' && Math.random() < 0.6) {
+    return legal[Math.floor(Math.random() * legal.length)];
+  }
 
   let bestId = legal[0];
   let bestScore = -Infinity;
@@ -106,24 +115,26 @@ export function chooseBestBotMove(state: GameState): number {
       score += 55;
     }
 
-    // 6. Escape threat vs walk into threat
-    const curPos = getTokenGridPosition(token);
-    const curGlobal = getGlobalTrackIndex(token);
-    if (curGlobal !== null && !isGridCellSafe(curPos.x, curPos.y)) {
-      if (isThreatenedByOpponent(state, activePlayer.color, curGlobal)) {
-        score += 40;
+    // 6. Escape threat vs walk into threat (Medium & Hard)
+    if (difficulty !== 'easy') {
+      const curPos = getTokenGridPosition(token);
+      const curGlobal = getGlobalTrackIndex(token);
+      if (curGlobal !== null && !isGridCellSafe(curPos.x, curPos.y)) {
+        if (isThreatenedByOpponent(state, activePlayer.color, curGlobal)) {
+          score += difficulty === 'hard' ? 45 : 20;
+        }
+      }
+
+      if (targetState === 'TRACK' && toStep <= 50 && !isGridCellSafe(targetPos.x, targetPos.y)) {
+        const nextGlobal = (COLOR_CONFIG[token.color].startTrackIndex + toStep) % GLOBAL_TRACK_COORDS.length;
+        if (isThreatenedByOpponent(state, activePlayer.color, nextGlobal)) {
+          score -= difficulty === 'hard' ? 40 : 15;
+        }
       }
     }
 
-    if (targetState === 'TRACK' && toStep <= 50 && !isGridCellSafe(targetPos.x, targetPos.y)) {
-      const nextGlobal = (COLOR_CONFIG[token.color].startTrackIndex + toStep) % GLOBAL_TRACK_COORDS.length;
-      if (isThreatenedByOpponent(state, activePlayer.color, nextGlobal)) {
-        score -= 35;
-      }
-    }
-
-    // 7. Slightly prefer advancing lead token
-    score += toStep * 0.4;
+    // 7. Slightly prefer advancing lead token (+ slight variance on medium)
+    score += toStep * 0.4 + (difficulty === 'medium' ? Math.random() * 18 : 0);
 
     if (score > bestScore) {
       bestScore = score;

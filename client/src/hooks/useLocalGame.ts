@@ -9,7 +9,7 @@ import {
   LudoEngine,
 } from '@ludo/shared';
 import { sounds } from '../game/soundEffects.js';
-import { chooseBestBotMove } from '../game/botAI.js';
+import { chooseBestBotMove, BotDifficulty } from '../game/botAI.js';
 import {
   PendingMoveAnimation,
   FloatingReaction,
@@ -28,6 +28,7 @@ export function useLocalGame() {
 
   const engineRef = useRef<LudoEngine | null>(null);
   const rollLockRef = useRef(false);
+  const difficultyRef = useRef<BotDifficulty>('medium');
   const timersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   const scheduleTimeout = useCallback((fn: () => void, ms: number) => {
@@ -122,7 +123,7 @@ export function useLocalGame() {
           if (!engineRef.current) return;
           const curState = engineRef.current.getState();
           if (curState.awaitingMove) {
-            const bestToken = chooseBestBotMove(curState);
+            const bestToken = chooseBestBotMove(curState, difficultyRef.current);
             executeMove(bestToken);
           }
         }, 950);
@@ -230,10 +231,12 @@ export function useLocalGame() {
       playerName: string,
       totalPlayers: 2 | 3 | 4,
       humanColor: PlayerColor = 'red',
-      turnTimerSeconds = 30
+      turnTimerSeconds = 30,
+      difficulty: BotDifficulty = 'medium'
     ) => {
       clearAllTimers();
       rollLockRef.current = false;
+      difficultyRef.current = difficulty;
       setIsRolling(false);
       setPendingMove(null);
 
@@ -278,13 +281,21 @@ export function useLocalGame() {
   );
 
   const startLocalGame = useCallback(
-    (playerNames: string[], totalPlayers: 2 | 3 | 4, turnTimerSeconds = 0) => {
+    (
+      playerNames: string[],
+      totalPlayers: 2 | 3 | 4,
+      turnTimerSeconds = 0,
+      customColors?: PlayerColor[]
+    ) => {
       clearAllTimers();
       rollLockRef.current = false;
       setIsRolling(false);
       setPendingMove(null);
 
-      const selectedColors = PLAYER_COLORS.slice(0, totalPlayers);
+      const selectedColors =
+        customColors && customColors.length === totalPlayers
+          ? customColors
+          : PLAYER_COLORS.slice(0, totalPlayers);
       const players: Player[] = selectedColors.map((color, idx) => ({
         id: `local-p${idx + 1}`,
         name: (playerNames[idx] || '').trim() || `Player ${idx + 1}`,

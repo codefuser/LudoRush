@@ -41,6 +41,8 @@ export interface RoomSettings {
   threeSixesCancel: boolean; // 3 consecutive sixes cancel turn
   captureBonus: boolean; // bonus roll on capture
   finishBonus: boolean; // bonus roll on token reaching home
+  roomName?: string;
+  isPrivate?: boolean;
 }
 
 export type GameStatus = 'LOBBY' | 'PLAYING' | 'FINISHED';
