@@ -30,6 +30,7 @@ export interface Player {
   isHost: boolean;
   isReady: boolean;
   isConnected: boolean;
+  isBot?: boolean;
   tokens: Token[];
   rank?: number; // 1 for 1st place, 2 for 2nd, etc.
 }

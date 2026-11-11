@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Player, PlayerColor, COLOR_CONFIG } from '@ludo/shared';
-import { Crown, Smile } from 'lucide-react';
+import { Crown, Smile, Bot } from 'lucide-react';
 
 interface PlayerCardProps {
   player: Player;
@@ -50,15 +50,17 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
         {/* Avatar */}
         <div className="relative shrink-0">
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs text-white shadow transition-transform"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs text-white shadow transition-transform ${
+              !player.isConnected && !player.isBot ? 'opacity-50 grayscale' : ''
+            }`}
             style={{
               background: `linear-gradient(135deg, ${config.lightHex}, ${config.hex})`,
               boxShadow: isActive ? `0 0 10px ${config.hex}` : undefined,
             }}
           >
-            {player.name.charAt(0).toUpperCase()}
+            {player.isBot ? <Bot size={15} /> : player.name.charAt(0).toUpperCase()}
           </div>
-          {player.isHost && (
+          {player.isHost && !player.isBot && (
             <span
               className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shadow-md border border-slate-900 shrink-0"
               style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px' }}
@@ -81,6 +83,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
           {isLocal && (
             <span className="text-[10px] font-bold text-cyan-400 shrink-0">
               (You)
+            </span>
+          )}
+          {!player.isConnected && !player.isBot && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-950/70 text-amber-300 border border-amber-500/30 shrink-0">
+              Offline
             </span>
           )}
         </div>

@@ -16,6 +16,7 @@ interface LudoBoardProps {
   pendingMove: PendingMoveAnimation | null;
   onMoveAnimationComplete: (finalState: GameState) => void;
   onMoveToken: (tokenId: number) => void;
+  allowLocalControl?: boolean;
 }
 
 export const LudoBoard: React.FC<LudoBoardProps> = ({
@@ -24,9 +25,14 @@ export const LudoBoard: React.FC<LudoBoardProps> = ({
   pendingMove,
   onMoveAnimationComplete,
   onMoveToken,
+  allowLocalControl = false,
 }) => {
   const activePlayer = gameState.players[gameState.activePlayerIndex];
-  const isMyTurn = localPlayer ? activePlayer?.id === localPlayer.id : false;
+  const isMyTurn = allowLocalControl
+    ? Boolean(activePlayer && !activePlayer.isBot)
+    : localPlayer
+    ? activePlayer?.id === localPlayer.id
+    : false;
 
   // Track rendered step and animation state for all tokens (key: "color-id")
   const [displaySteps, setDisplaySteps] = useState<Record<string, number>>({});

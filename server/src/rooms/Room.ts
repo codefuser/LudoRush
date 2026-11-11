@@ -270,12 +270,22 @@ export class Room {
         return;
       }
 
+      const preState = this.engine.getState();
+      const activePlayer = preState.players[preState.activePlayerIndex];
+      const connectedActiveCount = preState.players.filter(
+        (p) => p.isConnected && p.tokens.some((t) => t.state !== 'FINISHED')
+      ).length;
+
+      // Pause countdown when waiting for a disconnected opponent in 1v1 / lone-connected situation
+      if (activePlayer && !activePlayer.isConnected && connectedActiveCount <= 1) {
+        return;
+      }
+
       const { expired, timeRemaining } = this.engine.decrementTimer();
 
       // Emit countdown heartbeat
-      const state = this.engine.getState();
       this.io.to(this.id).emit('game:turn-changed', {
-        activePlayerColor: state.players[state.activePlayerIndex].color,
+        activePlayerColor: activePlayer.color,
         timeRemaining,
       });
 

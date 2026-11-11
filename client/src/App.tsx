@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useMultiplayer } from './hooks/useMultiplayer.js';
+import { useLocalGame } from './hooks/useLocalGame.js';
 import { Header } from './components/common/Header.js';
 import { HomeView } from './components/home/HomeView.js';
 import { LobbyView } from './components/lobby/LobbyView.js';
@@ -11,29 +12,24 @@ import { ReactionBar } from './components/common/ReactionBar.js';
 import { AlertCircle } from 'lucide-react';
 
 export const App: React.FC = () => {
-  const {
-    connected,
-    gameState,
-    localPlayer,
-    lastRoomCode,
-    isRolling,
-    pendingMove,
-    onMoveAnimationComplete,
-    error,
-    reactions,
-    createRoom,
-    joinRoom,
-    leaveRoom,
-    selectColor,
-    toggleReady,
-    updateSettings,
-    startGame,
-    rollDice,
-    moveToken,
-    triggerRematch,
-    sendReaction,
-    clearError,
-  } = useMultiplayer();
+  const remote = useMultiplayer();
+  const local = useLocalGame();
+
+  const isLocalActive = local.mode !== null;
+  const gameState = isLocalActive ? local.gameState : remote.gameState;
+  const localPlayer = isLocalActive ? local.localPlayer : remote.localPlayer;
+  const isRolling = isLocalActive ? local.isRolling : remote.isRolling;
+  const pendingMove = isLocalActive ? local.pendingMove : remote.pendingMove;
+  const reactions = isLocalActive ? local.reactions : remote.reactions;
+
+  const rollDice = isLocalActive ? local.rollDice : remote.rollDice;
+  const moveToken = isLocalActive ? local.moveToken : remote.moveToken;
+  const onMoveAnimationComplete = isLocalActive
+    ? local.onMoveAnimationComplete
+    : remote.onMoveAnimationComplete;
+  const triggerRematch = isLocalActive ? local.triggerRematch : remote.triggerRematch;
+  const leaveRoom = isLocalActive ? local.exitLocalGame : remote.leaveRoom;
+  const sendReaction = isLocalActive ? local.sendReaction : remote.sendReaction;
 
   const inviteCode = useMemo(() => {
     if (typeof window === 'undefined') return '';
@@ -42,7 +38,11 @@ export const App: React.FC = () => {
   }, []);
 
   const activePlayer = gameState?.players[gameState.activePlayerIndex];
-  const isMyTurn = localPlayer ? activePlayer?.id === localPlayer.id : false;
+  const isMyTurn = isLocalActive
+    ? Boolean(activePlayer && !activePlayer.isBot)
+    : localPlayer
+    ? activePlayer?.id === localPlayer.id
+    : false;
   const canRoll = Boolean(
     isMyTurn &&
       !gameState?.awaitingMove &&
@@ -50,6 +50,13 @@ export const App: React.FC = () => {
       gameState?.status === 'PLAYING' &&
       !isRolling
   );
+
+  const modeLabel =
+    local.mode === 'bot'
+      ? 'vs Computer'
+      : local.mode === 'local'
+      ? 'Pass & Play'
+      : undefined;
 
   // Check which quadrant position is active:
   // Red = Top-Left, Green = Top-Right, Blue = Bottom-Left, Yellow = Bottom-Right
@@ -59,7 +66,13 @@ export const App: React.FC = () => {
   const isYellowActive = activePlayer?.color === 'yellow';
 
   return (
-    <div className={`flex flex-col justify-between relative overflow-hidden bg-[#0B0F19] text-slate-100 select-none ${gameState && gameState.status === 'PLAYING' ? 'h-[100dvh] max-h-[100dvh]' : 'min-h-screen'}`}>
+    <div
+      className={`flex flex-col justify-between relative overflow-x-hidden bg-[#0B0F19] text-slate-100 select-none ${
+        gameState && gameState.status === 'PLAYING'
+          ? 'h-[100dvh] max-h-[100dvh] overflow-hidden'
+          : 'min-h-screen overflow-y-auto'
+      }`}
+    >
       {/* Background atmospheric ambient glows in 4 Ludo colors */}
       <div className="absolute -top-24 -left-24 w-[500px] h-[500px] bg-red-600/15 blur-[140px] pointer-events-none rounded-full" />
       <div className="absolute -top-24 -right-24 w-[500px] h-[500px] bg-emerald-600/15 blur-[140px] pointer-events-none rounded-full" />
@@ -69,17 +82,18 @@ export const App: React.FC = () => {
       {/* Global Header */}
       <Header
         roomCode={gameState?.roomCode}
-        connected={connected}
+        modeLabel={modeLabel}
+        connected={remote.connected}
         onLeave={gameState ? leaveRoom : undefined}
       />
 
       {/* Error Toast Notification */}
-      {error && (
+      {remote.error && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-950/90 border border-rose-500/50 text-rose-200 text-xs sm:text-sm font-semibold shadow-2xl backdrop-blur-md animate-bounce">
           <AlertCircle size={16} className="text-rose-400 shrink-0" />
-          <span>{error}</span>
+          <span>{remote.error}</span>
           <button
-            onClick={clearError}
+            onClick={remote.clearError}
             className="ml-2 text-rose-400 hover:text-white font-bold"
           >
             ✕
@@ -137,23 +151,29 @@ export const App: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 z-10 w-full overflow-hidden">
+      <main
+        className={`flex-1 flex flex-col items-center justify-center p-1 sm:p-2 z-10 w-full ${
+          gameState?.status === 'PLAYING' ? 'overflow-hidden' : 'overflow-y-auto'
+        }`}
+      >
         {!gameState ? (
           <HomeView
             initialRoomCode={inviteCode}
-            lastRoomCode={lastRoomCode}
-            connected={connected}
-            onCreateRoom={(name, settings) => createRoom(name, settings)}
-            onJoinRoom={(code, name) => joinRoom(code, name)}
+            lastRoomCode={remote.lastRoomCode}
+            connected={remote.connected}
+            onCreateRoom={(name, settings) => remote.createRoom(name, settings)}
+            onJoinRoom={(code, name) => remote.joinRoom(code, name)}
+            onStartBotGame={local.startBotGame}
+            onStartLocalGame={local.startLocalGame}
           />
         ) : gameState.status === 'LOBBY' ? (
           <LobbyView
             gameState={gameState}
             localPlayer={localPlayer}
-            onSelectColor={selectColor}
-            onToggleReady={toggleReady}
-            onUpdateSettings={updateSettings}
-            onStartGame={startGame}
+            onSelectColor={remote.selectColor}
+            onToggleReady={remote.toggleReady}
+            onUpdateSettings={remote.updateSettings}
+            onStartGame={remote.startGame}
             onLeaveRoom={leaveRoom}
           />
         ) : (
@@ -192,7 +212,11 @@ export const App: React.FC = () => {
                         : '#087CF0',
                   }}
                 >
-                  {isMyTurn ? 'YOUR TURN 🎲' : `${activePlayer?.name}'s Turn`}
+                  {local.mode === 'local'
+                    ? `${activePlayer?.name}'s Turn 🎲`
+                    : isMyTurn
+                    ? 'YOUR TURN 🎲'
+                    : `${activePlayer?.name}'s Turn`}
                 </span>
               </div>
 
@@ -276,6 +300,7 @@ export const App: React.FC = () => {
               pendingMove={pendingMove}
               onMoveAnimationComplete={onMoveAnimationComplete}
               onMoveToken={moveToken}
+              allowLocalControl={isLocalActive}
             />
 
             {/* BOTTOM DICE TRAY (Fixed height 56px: Left = Below Blue, Right = Below Yellow) */}
@@ -355,6 +380,7 @@ export const App: React.FC = () => {
               <GameOverModal
                 gameState={gameState}
                 localPlayer={localPlayer}
+                allowRematch={isLocalActive}
                 onRematch={triggerRematch}
                 onReturnHome={leaveRoom}
               />

@@ -308,4 +308,112 @@ describe('Real-Time Multiplayer Integration', () => {
       guestSocket.disconnect();
     }
   }, 10000);
+
+  it('does not let connected player take repeated turns while opponent has exited; waits for rejoin', async () => {
+    const hostSocket: ClientSocket<ServerToClientEvents, ClientToServerEvents> = Client(
+      `http://localhost:${port}`
+    );
+    const guestSocket: ClientSocket<ServerToClientEvents, ClientToServerEvents> = Client(
+      `http://localhost:${port}`
+    );
+
+    await new Promise<void>((resolve) => {
+      let count = 0;
+      const check = () => {
+        count++;
+        if (count === 2) resolve();
+      };
+      hostSocket.on('connect', check);
+      guestSocket.on('connect', check);
+    });
+
+    let roomCode = '';
+    await new Promise<void>((resolve) => {
+      hostSocket.emit(
+        'room:create',
+        { playerName: 'Joseph', settings: { maxPlayers: 2, turnTimerSeconds: 30 } },
+        (res) => {
+          roomCode = res.roomCode!;
+          resolve();
+        }
+      );
+    });
+    await new Promise<void>((resolve) => {
+      guestSocket.emit(
+        'room:join',
+        { roomCode, playerName: 'Guru', preferredColor: 'green' },
+        () => resolve()
+      );
+    });
+
+    const started = new Promise<void>((resolve) => {
+      hostSocket.once('game:started', () => resolve());
+    });
+    hostSocket.emit('room:start');
+    await started;
+
+    const room = roomManager.getRoomByCode(roomCode)!;
+    const engine = (room as any).engine;
+    // Give both players 1 token out on track
+    engine.state.players[0].tokens[0].state = 'TRACK';
+    engine.state.players[0].tokens[0].step = 2;
+    engine.state.players[1].tokens[0].state = 'TRACK';
+    engine.state.players[1].tokens[0].step = 5;
+
+    // Pass turn to Green (Guru)
+    room.advanceTurn();
+    expect(room.getGameState().activePlayerIndex).toBe(1);
+
+    // Joseph (Red) exits the room!
+    hostSocket.emit('room:leave');
+    await new Promise((r) => setTimeout(r, 80));
+
+    const spy = vi.spyOn(crypto, 'randomInt').mockImplementation((() => 3) as any);
+    try {
+      // Guru rolls 3 and token 0 auto-moves 5 -> 8
+      const movePromise = new Promise<any>((resolve) => {
+        guestSocket.once('game:move-accepted', (payload) => resolve(payload));
+      });
+      guestSocket.emit('game:roll');
+      const moveRes = await movePromise;
+      expect(moveRes.toStep).toBe(8);
+      // Turn MUST pass to Joseph (index 0) and wait, NOT return to Guru (index 1)!
+      expect(moveRes.state.activePlayerIndex).toBe(0);
+      expect(moveRes.state.players[0].isConnected).toBe(false);
+
+      // If Guru tries to roll again while Joseph is away -> MUST be rejected!
+      const errPromise = new Promise<string>((resolve) => {
+        guestSocket.once('room:error', ({ message }) => resolve(message));
+      });
+      guestSocket.emit('game:roll');
+      const errMsg = await errPromise;
+      expect(errMsg).toMatch(/Not your turn/i);
+
+      // Joseph rejoins using roomCode -> turn is still on Joseph (0) and Joseph can roll!
+      const rejoinedPromise = new Promise<any>((resolve) => {
+        hostSocket.once('room:joined', (payload) => resolve(payload));
+      });
+      await new Promise<void>((resolve) => {
+        hostSocket.emit('room:join', { roomCode, playerName: 'Joseph' }, (res) => {
+          expect(res.success).toBe(true);
+          resolve();
+        });
+      });
+      const rejoined = await rejoinedPromise;
+      expect(rejoined.state.activePlayerIndex).toBe(0);
+      expect(rejoined.state.players[0].isConnected).toBe(true);
+
+      const josephRollPromise = new Promise<any>((resolve) => {
+        hostSocket.once('game:dice-rolled', (p) => resolve(p));
+      });
+      hostSocket.emit('game:roll');
+      const josephRoll = await josephRollPromise;
+      expect(josephRoll.playerColor).toBe('red');
+      expect(josephRoll.roll).toBe(3);
+    } finally {
+      spy.mockRestore();
+      hostSocket.disconnect();
+      guestSocket.disconnect();
+    }
+  }, 10000);
 });

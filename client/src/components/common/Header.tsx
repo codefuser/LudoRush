@@ -4,11 +4,12 @@ import { sounds } from '../../game/soundEffects.js';
 
 interface HeaderProps {
   roomCode?: string;
+  modeLabel?: string;
   connected: boolean;
   onLeave?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ roomCode, connected, onLeave }) => {
+export const Header: React.FC<HeaderProps> = ({ roomCode, modeLabel, connected, onLeave }) => {
   const [muted, setMuted] = useState(!sounds.enabled);
   const [copied, setCopied] = useState(false);
 
@@ -37,8 +38,12 @@ export const Header: React.FC<HeaderProps> = ({ roomCode, connected, onLeave }) 
         </span>
       </div>
 
-      {/* Center Room Code Pill if inside a room */}
-      {roomCode && (
+      {/* Center Mode Badge or Copyable Room Code Pill */}
+      {modeLabel ? (
+        <div className="glass-pill px-3 py-1 flex items-center gap-1.5 text-xs font-bold text-cyan-300">
+          <span>{modeLabel}</span>
+        </div>
+      ) : roomCode ? (
         <button
           onClick={copyCode}
           title="Click to copy room code"
@@ -48,20 +53,22 @@ export const Header: React.FC<HeaderProps> = ({ roomCode, connected, onLeave }) 
           <span className="text-cyan-400 tracking-wider font-extrabold">{roomCode}</span>
           {copied ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
         </button>
-      )}
+      ) : null}
 
       {/* Controls & Connection Status */}
       <div className="flex items-center gap-1.5">
         {/* Connection status indicator */}
         <span
           className="flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full glass-pill"
-          style={{ color: connected ? '#10B981' : '#F59E0B' }}
+          style={{ color: modeLabel || connected ? '#10B981' : '#F59E0B' }}
         >
           <span
             className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ backgroundColor: connected ? '#10B981' : '#F59E0B' }}
+            style={{ backgroundColor: modeLabel || connected ? '#10B981' : '#F59E0B' }}
           />
-          <span className="hidden sm:inline">{connected ? 'Online' : 'Connecting...'}</span>
+          <span className="hidden sm:inline">
+            {modeLabel ? 'Local' : connected ? 'Online' : 'Connecting...'}
+          </span>
         </span>
 
         {/* Sound Toggle */}

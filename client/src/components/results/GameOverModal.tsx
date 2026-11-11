@@ -6,6 +6,7 @@ import { Trophy, RotateCcw, Home, Crown, Medal } from 'lucide-react';
 interface GameOverModalProps {
   gameState: GameState;
   localPlayer: Player | null;
+  allowRematch?: boolean;
   onRematch: () => void;
   onReturnHome: () => void;
 }
@@ -13,13 +14,14 @@ interface GameOverModalProps {
 export const GameOverModal: React.FC<GameOverModalProps> = ({
   gameState,
   localPlayer,
+  allowRematch = false,
   onRematch,
   onReturnHome,
 }) => {
   const winnerColor = gameState.winner;
   const winnerConfig = winnerColor ? COLOR_CONFIG[winnerColor] : null;
   const winnerPlayer = gameState.players.find((p) => p.color === winnerColor);
-  const isHost = localPlayer?.isHost ?? false;
+  const isHost = allowRematch || (localPlayer?.isHost ?? false);
 
   useEffect(() => {
     // Blast victory confetti

@@ -258,9 +258,19 @@ export function useMultiplayer() {
   }, []);
 
   // Smooth local 1-second countdown tick for turn timer
+  const activePlayerConnected =
+    gameState?.players[gameState?.activePlayerIndex]?.isConnected ?? true;
   useEffect(() => {
     if (!gameState || gameState.status !== 'PLAYING') return;
     if (gameState.settings.turnTimerSeconds <= 0) return;
+
+    const connectedActiveCount = gameState.players.filter(
+      (p) => p.isConnected && p.tokens.some((t) => t.state !== 'FINISHED')
+    ).length;
+
+    if (!activePlayerConnected && connectedActiveCount <= 1) {
+      return;
+    }
 
     const interval = setInterval(() => {
       setGameState((prev) => {
@@ -270,7 +280,7 @@ export function useMultiplayer() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameState?.turnVersion, gameState?.status, gameState?.activePlayerIndex]);
+  }, [gameState?.turnVersion, gameState?.status, gameState?.activePlayerIndex, activePlayerConnected]);
 
   const createRoom = useCallback(
     (playerName: string, settings?: Partial<RoomSettings>) => {
