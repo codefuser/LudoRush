@@ -15,6 +15,7 @@ export const App: React.FC = () => {
     connected,
     gameState,
     localPlayer,
+    lastRoomCode,
     isRolling,
     pendingMove,
     onMoveAnimationComplete,
@@ -42,7 +43,13 @@ export const App: React.FC = () => {
 
   const activePlayer = gameState?.players[gameState.activePlayerIndex];
   const isMyTurn = localPlayer ? activePlayer?.id === localPlayer.id : false;
-  const canRoll = isMyTurn && !gameState?.awaitingMove && gameState?.status === 'PLAYING';
+  const canRoll = Boolean(
+    isMyTurn &&
+      !gameState?.awaitingMove &&
+      gameState?.currentRoll === null &&
+      gameState?.status === 'PLAYING' &&
+      !isRolling
+  );
 
   // Check which quadrant position is active:
   // Red = Top-Left, Green = Top-Right, Blue = Bottom-Left, Yellow = Bottom-Right
@@ -134,6 +141,7 @@ export const App: React.FC = () => {
         {!gameState ? (
           <HomeView
             initialRoomCode={inviteCode}
+            lastRoomCode={lastRoomCode}
             connected={connected}
             onCreateRoom={(name, settings) => createRoom(name, settings)}
             onJoinRoom={(code, name) => joinRoom(code, name)}

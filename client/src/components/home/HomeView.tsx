@@ -17,30 +17,45 @@ interface HomeViewProps {
   onCreateRoom: (playerName: string, settings?: Partial<RoomSettings>) => void;
   onJoinRoom: (roomCode: string, playerName: string) => void;
   initialRoomCode?: string;
+  lastRoomCode?: string;
   connected?: boolean;
+}
+
+function sanitizeRoomCode(raw: string): string {
+  const urlMatch = raw.match(/[?&]room=([a-zA-Z0-9]{4,8})/i);
+  if (urlMatch) {
+    return urlMatch[1].toUpperCase().slice(0, 6);
+  }
+  const stripped = raw.replace(/^room:\s*/i, '').replace(/[^a-zA-Z0-9]/g, '');
+  return stripped.toUpperCase().slice(0, 6);
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
   onCreateRoom,
   onJoinRoom,
   initialRoomCode = '',
+  lastRoomCode = '',
   connected = true,
 }) => {
   const [tab, setTab] = useState<'create' | 'join'>(initialRoomCode ? 'join' : 'create');
   const [playerName, setPlayerName] = useState(() => {
     return localStorage.getItem('ludo_player_name') || '';
   });
-  const [roomCode, setRoomCode] = useState(initialRoomCode);
+  const [roomCode, setRoomCode] = useState(() =>
+    sanitizeRoomCode(initialRoomCode || lastRoomCode)
+  );
   const [maxPlayers, setMaxPlayers] = useState<2 | 3 | 4>(4);
   const [turnTimer, setTurnTimer] = useState<number>(30);
   const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     if (initialRoomCode) {
-      setRoomCode(initialRoomCode);
+      setRoomCode(sanitizeRoomCode(initialRoomCode));
       setTab('join');
+    } else if (lastRoomCode) {
+      setRoomCode((prev) => prev || sanitizeRoomCode(lastRoomCode));
     }
-  }, [initialRoomCode]);
+  }, [initialRoomCode, lastRoomCode]);
 
   const handleNameChange = (name: string) => {
     setPlayerName(name);
@@ -62,7 +77,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanName = playerName.trim() || 'Guest';
-    const cleanCode = roomCode.trim().toUpperCase();
+    const cleanCode = sanitizeRoomCode(roomCode);
     if (cleanCode) {
       onJoinRoom(cleanCode, cleanName);
     }
@@ -213,9 +228,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </label>
               <input
                 type="text"
-                maxLength={6}
                 value={roomCode}
-                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                onChange={(e) => setRoomCode(sanitizeRoomCode(e.target.value))}
                 placeholder="e.g. 7A9BK2"
                 className="ludo-input-field text-center font-mono tracking-widest text-lg font-bold uppercase"
               />

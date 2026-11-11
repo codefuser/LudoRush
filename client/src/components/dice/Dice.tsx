@@ -63,9 +63,10 @@ export const Dice: React.FC<DiceProps> = ({
   }, [value, isRolling]);
 
   useEffect(() => {
-    // Unlock click state when rolling finishes or when turn resets
-    if (!isRolling) {
-      const timer = setTimeout(() => setClickLocked(false), 500);
+    if (isRolling) {
+      setClickLocked(true);
+    } else if (canRoll && value === null) {
+      const timer = setTimeout(() => setClickLocked(false), 120);
       return () => clearTimeout(timer);
     }
   }, [value, canRoll, isRolling]);
@@ -238,6 +239,19 @@ export const Dice: React.FC<DiceProps> = ({
           }}
         >
           ROLL 🎲
+        </span>
+      )}
+
+      {/* Rolled Value Pill (Clearly shows rolled number once dice lands, even on 1-5 no moves!) */}
+      {value !== null && !isRolling && (!canRoll || clickLocked) && (
+        <span
+          className="text-[11px] font-black px-2.5 py-0.5 rounded-full text-white shadow-lg pointer-events-none whitespace-nowrap shrink-0 border border-white/25"
+          style={{
+            backgroundColor: `${config.hex}DD`,
+            boxShadow: `0 0 10px ${config.hex}88`,
+          }}
+        >
+          Rolled {value}
         </span>
       )}
     </div>

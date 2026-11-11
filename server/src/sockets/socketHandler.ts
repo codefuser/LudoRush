@@ -86,31 +86,39 @@ export function registerSocketHandlers(
     // 3. Join Room
     socket.on('room:join', ({ roomCode, playerName, preferredColor }, callback) => {
       const cleanName = (playerName || 'Guest').trim().substring(0, 20);
-      const room = roomManager.getRoomByCode(roomCode);
+      const cleanCode = (roomCode || '').trim().toUpperCase();
+      const room = roomManager.getRoomByCode(cleanCode);
 
       if (!room) {
         return callback({ success: false, error: 'Room not found. Check your code or invite link.' });
       }
 
       if (room.status !== 'LOBBY') {
-        // In active game, check if this is an existing or disconnected participant rejoining with the room code!
-        const byName = room.findParticipantByName(cleanName);
-        const disconnectedPart = Array.from(room.getParticipants().values()).find((p) => !p.player.isConnected);
-        const existingPart = byName || disconnectedPart;
+        // In active/finished game, allow rejoining existing or disconnected/stale seats by room code
+        const existingPart = room.findRejoinableParticipant(cleanName);
 
         if (existingPart) {
-          // Re-attach socket to existing player!
-          existingPart.player.name = cleanName;
+          // Detach previous socket from room channel if still lingering
+          if (existingPart.socketId && existingPart.socketId !== socket.id) {
+            io.sockets.sockets.get(existingPart.socketId)?.leave(room.id);
+          }
+
+          if (cleanName && cleanName !== 'Guest' && cleanName !== 'Player') {
+            existingPart.player.name = cleanName;
+          }
           existingPart.player.isConnected = true;
           room.updatePlayerSocket(existingPart.player.id, socket.id);
           socket.join(room.id);
           socket.emit('session:init', { playerId: existingPart.player.id, sessionToken: existingPart.sessionToken });
 
           const state = room.getGameState();
+          const syncedPlayer =
+            state.players.find((p) => p.id === existingPart.player.id) || existingPart.player;
+
           socket.emit('room:joined', {
             roomId: room.id,
             roomCode: room.code,
-            player: existingPart.player,
+            player: syncedPlayer,
             state,
           });
           socket.emit('game:state', { state });
@@ -140,13 +148,17 @@ export function registerSocketHandlers(
 
       const playerId = uuidv4();
       const sessionToken = uuidv4();
+      const hasConnectedHost = room.getPlayers().some((p) => p.isHost && p.isConnected);
+      if (!hasConnectedHost) {
+        room.hostPlayerId = playerId;
+      }
 
       const newPlayer: Player = {
         id: playerId,
         name: cleanName,
         color: chosenColor,
-        isHost: false,
-        isReady: false,
+        isHost: !hasConnectedHost,
+        isReady: !hasConnectedHost,
         isConnected: true,
         tokens: [],
       };
@@ -283,12 +295,12 @@ export function registerSocketHandlers(
       }
 
       if (shouldAutoMove && autoTokenId !== undefined) {
-        room.scheduleAutoMove(playerId, autoTokenId, 500);
+        room.scheduleAutoMove(playerId, autoTokenId, 850);
       }
 
-      // Scenario B: No legal moves (or 3 sixes cancel) -> show rolled dice for 1.4s then advance turn
+      // Scenario B: No legal moves (or 3 sixes cancel) -> hold rolled dice clearly for 2.3s then advance turn
       if ((!res.hasMoves && res.roll !== 6) || res.turnCancelled) {
-        room.scheduleAdvanceTurn(1400);
+        room.scheduleAdvanceTurn(2300);
       }
     });
 

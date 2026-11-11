@@ -30,6 +30,7 @@ export class Room {
   private rollInProgress: boolean = false;
   private pendingAdvanceTimeout: NodeJS.Timeout | null = null;
   private pendingAutoMoveTimeout: NodeJS.Timeout | null = null;
+  private pendingBonusClearTimeout: NodeJS.Timeout | null = null;
   private io: Server;
 
   constructor(
@@ -92,6 +93,24 @@ export class Room {
     return undefined;
   }
 
+  public findRejoinableParticipant(cleanName: string): RoomParticipant | undefined {
+    // 1. Exact case-insensitive name match
+    const byName = this.findParticipantByName(cleanName);
+    if (byName) return byName;
+
+    // 2. Any explicitly disconnected seat
+    const disconnectedPart = Array.from(this.participants.values()).find(
+      (p) => !p.player.isConnected
+    );
+    if (disconnectedPart) return disconnectedPart;
+
+    // 3. Any seat whose previous socket is already closed/gone (handles instant tab reopen before ping timeout)
+    const deadSocketPart = Array.from(this.participants.values()).find(
+      (p) => !p.socketId || !this.io.sockets.sockets.get(p.socketId)?.connected
+    );
+    return deadSocketPart;
+  }
+
   public getPlayers(): Player[] {
     return Array.from(this.participants.values()).map((p) => p.player);
   }
@@ -101,6 +120,10 @@ export class Room {
     if (part) {
       part.socketId = socketId;
       part.player.isConnected = true;
+      this.engine?.syncPlayer(playerId, {
+        isConnected: true,
+        name: part.player.name,
+      });
       this.lastActiveAt = Date.now();
     }
   }
@@ -109,6 +132,8 @@ export class Room {
     const part = this.getParticipantBySocket(socketId);
     if (part) {
       part.player.isConnected = false;
+      part.socketId = '';
+      this.engine?.syncPlayer(part.player.id, { isConnected: false });
       this.lastActiveAt = Date.now();
 
       // If host disconnected in lobby, transfer host if other players are connected
@@ -128,11 +153,13 @@ export class Room {
   }
 
   public removePlayer(playerId: string): boolean {
-    if (this.status === 'PLAYING') {
-      // In active game, preserve the player seat and token positions so they can rejoin with room code!
+    if (this.status === 'PLAYING' || this.status === 'FINISHED') {
+      // Preserve seat, color, and tokens so player can rejoin anytime via room code
       const part = this.participants.get(playerId);
       if (part) {
         part.player.isConnected = false;
+        part.socketId = '';
+        this.engine?.syncPlayer(playerId, { isConnected: false });
         this.lastActiveAt = Date.now();
       }
       return true;
@@ -260,6 +287,13 @@ export class Room {
 
   private handleTurnTimeout(): void {
     if (!this.engine) return;
+    if (this.pendingAdvanceTimeout || this.pendingBonusClearTimeout) {
+      // Turn was already rolled and is waiting to display result before advancing
+      this.advanceTurn();
+      this.io.to(this.id).emit('game:state', { state: this.getGameState() });
+      return;
+    }
+
     const state = this.engine.getState();
     const activePlayer = state.players[state.activePlayerIndex];
 
@@ -269,6 +303,7 @@ export class Room {
       // Player timed out without rolling: auto-roll
       const rollRes = this.engine.rollDice();
       if (rollRes.success && rollRes.roll !== undefined) {
+        this.rollInProgress = true;
         this.io.to(this.id).emit('game:dice-rolled', {
           playerColor: activePlayer.color,
           roll: rollRes.roll,
@@ -279,20 +314,31 @@ export class Room {
         const updatedState = this.engine.getState();
         this.io.to(this.id).emit('game:state', { state: updatedState });
 
-        // If exactly 1 legal move, auto-move it
-        if (rollRes.legalTokens && rollRes.legalTokens.length === 1) {
-          const moveRes = this.engine.moveToken(rollRes.legalTokens[0]);
-          this.broadcastMove(moveRes, activePlayer.color);
+        if (rollRes.hasMoves && rollRes.legalTokens && rollRes.legalTokens.length > 0) {
+          this.scheduleAutoMove(activePlayer.id, rollRes.legalTokens[0], 700);
+        } else if (rollRes.roll === 6 && !rollRes.turnCancelled) {
+          this.clearPendingBonusClear();
+          this.pendingBonusClearTimeout = setTimeout(() => {
+            this.pendingBonusClearTimeout = null;
+            if (this.engine && this.status === 'PLAYING') {
+              this.engine.clearCurrentRoll();
+              this.rollInProgress = false;
+              this.io.to(this.id).emit('game:state', { state: this.getGameState() });
+            }
+          }, 1200);
+        } else {
+          this.scheduleAdvanceTurn(1800);
         }
       }
     } else {
       // Player timed out while choosing a move
       if (state.legalTokenIndices.length > 0) {
-        // Auto-move first legal token
+        this.clearPendingAutoMove();
         const moveRes = this.engine.moveToken(state.legalTokenIndices[0]);
+        this.rollInProgress = false;
         this.broadcastMove(moveRes, activePlayer.color);
       } else {
-        this.engine.advanceTurn();
+        this.advanceTurn();
         this.io.to(this.id).emit('game:state', { state: this.engine.getState() });
       }
     }
@@ -309,6 +355,13 @@ export class Room {
     if (this.pendingAutoMoveTimeout) {
       clearTimeout(this.pendingAutoMoveTimeout);
       this.pendingAutoMoveTimeout = null;
+    }
+  }
+
+  public clearPendingBonusClear(): void {
+    if (this.pendingBonusClearTimeout) {
+      clearTimeout(this.pendingBonusClearTimeout);
+      this.pendingBonusClearTimeout = null;
     }
   }
 
@@ -345,12 +398,17 @@ export class Room {
     if (res.success) {
       this.rollInProgress = true;
       this.lastActiveAt = Date.now();
-      if (!res.hasMoves && res.roll === 6) {
-        // Rolled a 6 with no moves: let player roll again after 1000ms
-        setTimeout(() => {
-          this.rollInProgress = false;
-          this.io.to(this.id).emit('game:state', { state: this.getGameState() });
-        }, 1000);
+      if (!res.hasMoves && res.roll === 6 && !res.turnCancelled) {
+        // Show the rolled 6 clearly before resetting currentRoll for the bonus roll
+        this.clearPendingBonusClear();
+        this.pendingBonusClearTimeout = setTimeout(() => {
+          this.pendingBonusClearTimeout = null;
+          if (this.engine && this.status === 'PLAYING') {
+            this.engine.clearCurrentRoll();
+            this.rollInProgress = false;
+            this.io.to(this.id).emit('game:state', { state: this.getGameState() });
+          }
+        }, 1400);
       }
     }
     return res;
@@ -359,6 +417,7 @@ export class Room {
   public advanceTurn(): void {
     this.clearPendingAdvance();
     this.clearPendingAutoMove();
+    this.clearPendingBonusClear();
     this.rollInProgress = false;
     if (this.engine && this.status === 'PLAYING') {
       this.engine.advanceTurn();
@@ -457,6 +516,7 @@ export class Room {
   public cleanup(): void {
     this.clearPendingAdvance();
     this.clearPendingAutoMove();
+    this.clearPendingBonusClear();
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;

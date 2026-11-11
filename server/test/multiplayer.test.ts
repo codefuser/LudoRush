@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import crypto from 'node:crypto';
 import http from 'node:http';
 import express from 'express';
 import { Server } from 'socket.io';
@@ -115,4 +116,196 @@ describe('Real-Time Multiplayer Integration', () => {
     hostSocket.disconnect();
     guestSocket.disconnect();
   });
+
+  it('allows leaving an active game and rejoining with the room code', async () => {
+    const hostSocket: ClientSocket<ServerToClientEvents, ClientToServerEvents> = Client(
+      `http://localhost:${port}`
+    );
+    const guestSocket: ClientSocket<ServerToClientEvents, ClientToServerEvents> = Client(
+      `http://localhost:${port}`
+    );
+
+    await new Promise<void>((resolve) => {
+      let count = 0;
+      const check = () => {
+        count++;
+        if (count === 2) resolve();
+      };
+      hostSocket.on('connect', check);
+      guestSocket.on('connect', check);
+    });
+
+    let roomCode = '';
+    await new Promise<void>((resolve) => {
+      hostSocket.emit(
+        'room:create',
+        { playerName: 'Joseph', settings: { maxPlayers: 2, turnTimerSeconds: 0 } },
+        (res) => {
+          expect(res.success).toBe(true);
+          roomCode = res.roomCode!;
+          resolve();
+        }
+      );
+    });
+
+    await new Promise<void>((resolve) => {
+      guestSocket.emit(
+        'room:join',
+        { roomCode, playerName: 'Guru', preferredColor: 'green' },
+        (res) => {
+          expect(res.success).toBe(true);
+          resolve();
+        }
+      );
+    });
+
+    const started = new Promise<void>((resolve) => {
+      guestSocket.once('game:started', () => resolve());
+    });
+    hostSocket.emit('room:start');
+    await started;
+
+    // Guest leaves room cleanly
+    guestSocket.emit('room:leave');
+    await new Promise((r) => setTimeout(r, 80));
+
+    // Guest rejoins from the same socket using roomCode
+    const rejoinedStatePromise = new Promise<any>((resolve) => {
+      guestSocket.once('room:joined', (payload) => resolve(payload));
+    });
+    await new Promise<void>((resolve) => {
+      guestSocket.emit(
+        'room:join',
+        { roomCode, playerName: 'Guru' },
+        (res) => {
+          expect(res.success).toBe(true);
+          resolve();
+        }
+      );
+    });
+    const rejoined = await rejoinedStatePromise;
+    expect(rejoined.player.color).toBe('green');
+    expect(rejoined.player.isConnected).toBe(true);
+    expect(rejoined.state.status).toBe('PLAYING');
+
+    // Guest leaves again and rejoins from a brand-new tab/socket even with different name
+    guestSocket.emit('room:leave');
+    await new Promise((r) => setTimeout(r, 80));
+
+    const freshSocket: ClientSocket<ServerToClientEvents, ClientToServerEvents> = Client(
+      `http://localhost:${port}`
+    );
+    await new Promise<void>((resolve) => freshSocket.on('connect', () => resolve()));
+
+    const freshRejoinPromise = new Promise<any>((resolve) => {
+      freshSocket.once('room:joined', (payload) => resolve(payload));
+    });
+    await new Promise<void>((resolve) => {
+      freshSocket.emit(
+        'room:join',
+        { roomCode, playerName: 'Guest' },
+        (res) => {
+          expect(res.success).toBe(true);
+          resolve();
+        }
+      );
+    });
+    const freshRejoined = await freshRejoinPromise;
+    expect(freshRejoined.player.color).toBe('green');
+    expect(freshRejoined.state.status).toBe('PLAYING');
+
+    hostSocket.disconnect();
+    guestSocket.disconnect();
+    freshSocket.disconnect();
+  });
+
+  it('holds 1..5 no-move roll briefly so player sees rolled number, and auto-moves single legal token', async () => {
+    const hostSocket: ClientSocket<ServerToClientEvents, ClientToServerEvents> = Client(
+      `http://localhost:${port}`
+    );
+    const guestSocket: ClientSocket<ServerToClientEvents, ClientToServerEvents> = Client(
+      `http://localhost:${port}`
+    );
+
+    await new Promise<void>((resolve) => {
+      let count = 0;
+      const check = () => {
+        count++;
+        if (count === 2) resolve();
+      };
+      hostSocket.on('connect', check);
+      guestSocket.on('connect', check);
+    });
+
+    let roomCode = '';
+    await new Promise<void>((resolve) => {
+      hostSocket.emit(
+        'room:create',
+        { playerName: 'Alice', settings: { maxPlayers: 2, turnTimerSeconds: 0 } },
+        (res) => {
+          roomCode = res.roomCode!;
+          resolve();
+        }
+      );
+    });
+    await new Promise<void>((resolve) => {
+      guestSocket.emit(
+        'room:join',
+        { roomCode, playerName: 'Bob', preferredColor: 'green' },
+        () => resolve()
+      );
+    });
+
+    const started = new Promise<void>((resolve) => {
+      hostSocket.once('game:started', () => resolve());
+    });
+    hostSocket.emit('room:start');
+    await started;
+
+    const spy = vi.spyOn(crypto, 'randomInt').mockImplementation((() => 4) as any);
+    try {
+      // 1) All tokens in base: roll 4 -> must hold turn on Red with currentRoll === 4 before advancing!
+      const stateAfterNoMovePromise = new Promise<any>((resolve) => {
+        hostSocket.once('game:state', ({ state }) => resolve(state));
+      });
+      hostSocket.emit('game:roll');
+      const stateAfterNoMove = await stateAfterNoMovePromise;
+      expect(stateAfterNoMove.currentRoll).toBe(4);
+      expect(stateAfterNoMove.activePlayerIndex).toBe(0);
+
+      // Even 1000ms later, dice number 4 should still be held on Red's turn
+      await new Promise((r) => setTimeout(r, 1000));
+      const room = roomManager.getRoomByCode(roomCode)!;
+      expect(room.getGameState().activePlayerIndex).toBe(0);
+      expect(room.getGameState().currentRoll).toBe(4);
+
+      // Wait for advanceTurn at 2300ms -> now Green's turn
+      const advancedPromise = new Promise<any>((resolve) => {
+        hostSocket.once('game:state', ({ state }) => resolve(state));
+      });
+      const advancedState = await advancedPromise;
+      expect(advancedState.activePlayerIndex).toBe(1);
+      expect(advancedState.currentRoll).toBeNull();
+
+      // 2) Green has 1 coin out on track (step 5) and rolls 3 -> must auto-move token 0 from 5 to 8!
+      const engine = (room as any).engine;
+      engine.state.players[1].tokens[0].state = 'TRACK';
+      engine.state.players[1].tokens[0].step = 5;
+      spy.mockImplementation((() => 3) as any);
+
+      const autoMovePromise = new Promise<any>((resolve) => {
+        guestSocket.once('game:move-accepted', (payload) => resolve(payload));
+      });
+      guestSocket.emit('game:roll');
+      const movePayload = await autoMovePromise;
+      expect(movePayload.playerColor).toBe('green');
+      expect(movePayload.tokenId).toBe(0);
+      expect(movePayload.fromStep).toBe(5);
+      expect(movePayload.toStep).toBe(8);
+    } finally {
+      spy.mockRestore();
+      hostSocket.disconnect();
+      guestSocket.disconnect();
+    }
+  }, 10000);
 });

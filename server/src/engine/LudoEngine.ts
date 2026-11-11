@@ -91,6 +91,25 @@ export class LudoEngine {
     return this.state.players[this.state.activePlayerIndex];
   }
 
+  public syncPlayer(
+    playerId: string,
+    updates: { isConnected?: boolean; name?: string }
+  ): void {
+    const p = this.state.players.find((pl) => pl.id === playerId);
+    if (p) {
+      if (updates.isConnected !== undefined) {
+        p.isConnected = updates.isConnected;
+      }
+      if (updates.name !== undefined) {
+        p.name = updates.name;
+      }
+    }
+  }
+
+  public clearCurrentRoll(): void {
+    this.state.currentRoll = null;
+  }
+
   /**
    * Secure dice roll generated authoritatively on server.
    */
@@ -164,9 +183,8 @@ export class LudoEngine {
       // No legal moves
       this.state.awaitingMove = false;
       if (roll === 6) {
-        // Player rolled a 6 but had no valid moves; player still gets their extra turn
+        // Keep currentRoll = 6 briefly so UI displays the landed 6 before clearing for bonus roll
         this.state.lastActionMessage = `${activePlayer.name} rolled a 6 with no legal moves! Roll again.`;
-        this.state.currentRoll = null;
         return {
           success: true,
           roll,

@@ -53,9 +53,17 @@ export function useMultiplayer() {
   const [pendingMove, setPendingMove] = useState<PendingMoveAnimation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reactions, setReactions] = useState<FloatingReaction[]>([]);
+  const [lastRoomCode, setLastRoomCode] = useState<string>('');
 
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
   const rollLockRef = useRef(false);
+  const rollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const localPlayerRef = useRef<Player | null>(null);
+
+  const updateLocalPlayer = useCallback((player: Player | null) => {
+    localPlayerRef.current = player;
+    setLocalPlayer(player);
+  }, []);
 
   // Initialize socket
   useEffect(() => {
@@ -106,7 +114,8 @@ export function useMultiplayer() {
               (res: { success: boolean; state?: GameState; player?: Player; error?: string }) => {
                 if (res.success && res.state && res.player) {
                   setGameState(res.state);
-                  setLocalPlayer(res.player);
+                  updateLocalPlayer(res.player);
+                  setLastRoomCode(res.state.roomCode);
                 } else {
                   sessionStorage.removeItem(SESSION_STORAGE_KEY);
                 }
@@ -142,9 +151,10 @@ export function useMultiplayer() {
       }
     });
 
-    socket.on('room:joined', ({ roomId, player, state }: { roomId: string; roomCode: string; player: Player; state: GameState }) => {
+    socket.on('room:joined', ({ roomId, roomCode, player, state }: { roomId: string; roomCode: string; player: Player; state: GameState }) => {
       setGameState(state);
-      setLocalPlayer(player);
+      updateLocalPlayer(player);
+      setLastRoomCode(roomCode || state.roomCode);
       setError(null);
 
       try {
@@ -161,9 +171,10 @@ export function useMultiplayer() {
 
     socket.on('room:updated', ({ state }: { state: GameState }) => {
       setGameState(state);
-      if (localPlayer) {
-        const updatedMe = state.players.find((p: Player) => p.id === localPlayer.id);
-        if (updatedMe) setLocalPlayer(updatedMe);
+      const currentMe = localPlayerRef.current;
+      if (currentMe) {
+        const updatedMe = state.players.find((p: Player) => p.id === currentMe.id);
+        if (updatedMe) updateLocalPlayer(updatedMe);
       }
     });
 
@@ -183,18 +194,21 @@ export function useMultiplayer() {
     socket.on('game:state', ({ state }: { state: GameState }) => {
       setGameState(state);
       rollLockRef.current = false;
-      if (localPlayer) {
-        const updatedMe = state.players.find((p: Player) => p.id === localPlayer.id);
-        if (updatedMe) setLocalPlayer(updatedMe);
+      const currentMe = localPlayerRef.current;
+      if (currentMe) {
+        const updatedMe = state.players.find((p: Player) => p.id === currentMe.id);
+        if (updatedMe) updateLocalPlayer(updatedMe);
       }
     });
 
     socket.on('game:dice-rolled', ({ roll, hasMoves }: { playerColor: PlayerColor; roll: number; legalTokens: number[]; hasMoves: boolean }) => {
       sounds.playRoll();
       setIsRolling(true);
-      setTimeout(() => {
+      if (rollTimerRef.current) clearTimeout(rollTimerRef.current);
+      rollTimerRef.current = setTimeout(() => {
+        rollTimerRef.current = null;
         setIsRolling(false);
-      }, 500);
+      }, 360);
     });
 
     socket.on('game:move-accepted', (payload: any) => {
@@ -207,6 +221,7 @@ export function useMultiplayer() {
     });
 
     socket.on('game:turn-changed', ({ timeRemaining }: { activePlayerColor: PlayerColor; timeRemaining: number }) => {
+      rollLockRef.current = false;
       setGameState((prev) => (prev ? { ...prev, turnTimeRemaining: timeRemaining } : prev));
     });
 
@@ -292,9 +307,12 @@ export function useMultiplayer() {
       socketRef.current.emit('room:leave');
     }
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
+    rollLockRef.current = false;
+    setIsRolling(false);
+    setPendingMove(null);
     setGameState(null);
-    setLocalPlayer(null);
-  }, []);
+    updateLocalPlayer(null);
+  }, [updateLocalPlayer]);
 
   const selectColor = useCallback((color: PlayerColor) => {
     if (socketRef.current) {
@@ -350,16 +368,19 @@ export function useMultiplayer() {
   const onMoveAnimationComplete = useCallback((finalState: GameState) => {
     setPendingMove(null);
     setGameState(finalState);
-    if (localPlayer) {
-      const updatedMe = finalState.players.find((p: Player) => p.id === localPlayer.id);
-      if (updatedMe) setLocalPlayer(updatedMe);
+    rollLockRef.current = false;
+    const currentMe = localPlayerRef.current;
+    if (currentMe) {
+      const updatedMe = finalState.players.find((p: Player) => p.id === currentMe.id);
+      if (updatedMe) updateLocalPlayer(updatedMe);
     }
-  }, [localPlayer]);
+  }, [updateLocalPlayer]);
 
   return {
     connected,
     gameState,
     localPlayer,
+    lastRoomCode,
     isRolling,
     pendingMove,
     onMoveAnimationComplete,
