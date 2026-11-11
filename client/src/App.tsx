@@ -152,8 +152,12 @@ export const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main
-        className={`flex-1 flex flex-col items-center justify-center p-1 sm:p-2 z-10 w-full ${
-          gameState?.status === 'PLAYING' ? 'overflow-hidden' : 'overflow-y-auto'
+        className={`flex-1 flex flex-col items-center p-1 sm:p-2 z-10 w-full ${
+          !gameState
+            ? 'justify-start pt-2 overflow-y-auto'
+            : gameState.status === 'PLAYING'
+            ? 'justify-center overflow-hidden'
+            : 'justify-center overflow-y-auto'
         }`}
       >
         {!gameState ? (

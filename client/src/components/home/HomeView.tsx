@@ -129,96 +129,85 @@ export const HomeView: React.FC<HomeViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 sm:p-6 flex flex-col items-center justify-center min-h-[85vh]">
+    <div className="w-full max-w-md mx-auto px-4 pt-2 sm:pt-4 pb-6 flex flex-col items-center">
       {/* Brand Logo & Title with 4 Ludo Colors */}
-      <div className="flex flex-col items-center text-center mb-7">
-        <div className="relative mb-3.5">
-          <div className="w-20 h-20 rounded-3xl p-1 bg-gradient-to-tr from-rose-500 via-amber-400 to-cyan-400 shadow-2xl shadow-cyan-500/20 flex items-center justify-center transition-transform hover:scale-105">
-            <div className="w-full h-full rounded-[22px] bg-slate-950 flex items-center justify-center relative overflow-hidden">
-              <div className="grid grid-cols-2 gap-2.5 p-3">
-                <div className="w-4 h-4 rounded-full bg-[#F51F2B] shadow-sm shadow-red-500/80 animate-pulse" />
-                <div className="w-4 h-4 rounded-full bg-[#08B84B] shadow-sm shadow-green-500/80" />
-                <div className="w-4 h-4 rounded-full bg-[#087CF0] shadow-sm shadow-blue-500/80" />
-                <div className="w-4 h-4 rounded-full bg-[#FFD817] shadow-sm shadow-yellow-500/80" />
-              </div>
+      <div className="flex flex-col items-center text-center mb-5">
+        <div className="relative mb-3">
+          <div className="ludo-brand-badge">
+            <div className="ludo-brand-badge-inner">
+              <div className="ludo-brand-dot" style={{ backgroundColor: '#F51F2B', boxShadow: '0 0 10px rgba(245,31,43,0.8)' }} />
+              <div className="ludo-brand-dot" style={{ backgroundColor: '#08B84B', boxShadow: '0 0 10px rgba(8,184,75,0.8)' }} />
+              <div className="ludo-brand-dot" style={{ backgroundColor: '#087CF0', boxShadow: '0 0 10px rgba(8,124,240,0.8)' }} />
+              <div className="ludo-brand-dot" style={{ backgroundColor: '#FFD817', boxShadow: '0 0 10px rgba(255,216,23,0.8)' }} />
             </div>
           </div>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white font-display">
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white font-display">
           LUDO <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500">RUSH</span>
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-xs font-medium">
-          Real-time multiplayer board game. Play instantly with friends on any device.
+        <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xs font-medium">
+          Play Online with friends, vs Computer, or Offline together.
         </p>
       </div>
 
       {/* Main Action Card */}
       <div className="w-full ludo-hero-card p-5 sm:p-6">
         {/* Game Mode Selector */}
-        <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-slate-950/70 border border-slate-800/80 mb-5">
+        <div className="ludo-mode-bar mb-5">
           <button
             type="button"
             onClick={() => setPlayMode('online')}
-            className={`py-2 px-2 rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-              playMode === 'online'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`ludo-mode-tab ${playMode === 'online' ? 'active-online' : ''}`}
           >
-            <Globe size={13} /> Online
+            <Globe size={14} /> <span>Online</span>
           </button>
           <button
             type="button"
             onClick={() => setPlayMode('bot')}
-            className={`py-2 px-2 rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-              playMode === 'bot'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`ludo-mode-tab ${playMode === 'bot' ? 'active-bot' : ''}`}
           >
-            <Bot size={13} /> vs CPU
+            <Bot size={14} /> <span>Computer</span>
           </button>
           <button
             type="button"
             onClick={() => setPlayMode('local')}
-            className={`py-2 px-2 rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-              playMode === 'local'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`ludo-mode-tab ${playMode === 'local' ? 'active-local' : ''}`}
           >
-            <Smartphone size={13} /> Same Phone
+            <Users size={14} /> <span>Pass & Play</span>
           </button>
         </div>
 
-        {playMode === 'online' ? (
-          <>
-            {/* Create / Join Sub-Tab Switcher */}
-            <div className="ludo-tab-bar mb-5">
-              <button
-                type="button"
-                onClick={() => setTab('create')}
-                className={`ludo-tab-item ${tab === 'create' ? 'active' : ''}`}
-              >
-                Create Room
-              </button>
-              <button
-                type="button"
-                onClick={() => setTab('join')}
-                className={`ludo-tab-item ${tab === 'join' ? 'active' : ''}`}
-              >
-                Join Room
-              </button>
-            </div>
+        <div
+          key={playMode === 'online' ? `online-${tab}` : playMode}
+          className="tab-panel-animate"
+        >
+          {playMode === 'online' ? (
+            <>
+              {/* Create / Join Sub-Tab Switcher */}
+              <div className="ludo-tab-bar mb-5">
+                <button
+                  type="button"
+                  onClick={() => setTab('create')}
+                  className={`ludo-tab-item ${tab === 'create' ? 'active' : ''}`}
+                >
+                  Create Room
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTab('join')}
+                  className={`ludo-tab-item ${tab === 'join' ? 'active' : ''}`}
+                >
+                  Join Room
+                </button>
+              </div>
 
-            {tab === 'create' ? (
-              <form onSubmit={handleCreate} className="flex flex-col gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                    <User size={13} className="text-cyan-400" /> Your Display Name
-                  </label>
-                  <div className="relative flex items-center">
+              {tab === 'create' ? (
+                <form onSubmit={handleCreate} className="flex flex-col gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                      <User size={13} className="text-cyan-400" /> Your Display Name
+                    </label>
                     <input
                       type="text"
                       maxLength={18}
@@ -228,295 +217,305 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       className="ludo-input-field"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                        <Users size={13} className="text-cyan-400" /> Players
+                      </label>
+                      <div className="ludo-chip-group">
+                        {[2, 3, 4].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setMaxPlayers(num as 2 | 3 | 4)}
+                            className={`ludo-chip ${maxPlayers === num ? 'active' : ''}`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                        <Clock size={13} className="text-cyan-400" /> Timer
+                      </label>
+                      <div className="ludo-chip-group">
+                        {[0, 15, 30].map((sec) => (
+                          <button
+                            key={sec}
+                            type="button"
+                            onClick={() => setTurnTimer(sec)}
+                            className={`ludo-chip ${turnTimer === sec ? 'active' : ''}`}
+                          >
+                            {sec === 0 ? 'Off' : `${sec}s`}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!connected}
+                    className={`mt-2 ludo-cta-button flex items-center justify-center gap-2 ${!connected ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  >
+                    {connected ? (
+                      <>
+                        <Sparkles size={17} /> <span>Create Private Room</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin mr-1" />
+                        <span>Connecting to Server...</span>
+                      </>
+                    )}
+                  </button>
+                  {!connected && (
+                    <p className="text-[11px] text-amber-400/90 text-center font-medium animate-pulse">
+                      Connecting to multiplayer backend...
+                    </p>
+                  )}
+                </form>
+              ) : (
+                <form onSubmit={handleJoin} className="flex flex-col gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                      <Users size={13} className="text-cyan-400" /> Players
+                      <User size={13} className="text-cyan-400" /> Your Display Name
                     </label>
-                    <div className="ludo-chip-group">
-                      {[2, 3, 4].map((num) => (
-                        <button
-                          key={num}
-                          type="button"
-                          onClick={() => setMaxPlayers(num as 2 | 3 | 4)}
-                          className={`ludo-chip ${maxPlayers === num ? 'active' : ''}`}
-                        >
-                          {num}
-                        </button>
-                      ))}
-                    </div>
+                    <input
+                      type="text"
+                      maxLength={18}
+                      value={playerName}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      placeholder="e.g. LuckyLudo"
+                      className="ludo-input-field"
+                    />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                      <Clock size={13} className="text-cyan-400" /> Timer
+                      <Hash size={13} className="text-cyan-400" /> 6-Digit Room Code
                     </label>
-                    <div className="ludo-chip-group">
-                      {[0, 15, 30].map((sec) => (
-                        <button
-                          key={sec}
-                          type="button"
-                          onClick={() => setTurnTimer(sec)}
-                          className={`ludo-chip ${turnTimer === sec ? 'active' : ''}`}
-                        >
-                          {sec === 0 ? 'Off' : `${sec}s`}
-                        </button>
-                      ))}
-                    </div>
+                    <input
+                      type="text"
+                      value={roomCode}
+                      onChange={(e) => setRoomCode(sanitizeRoomCode(e.target.value))}
+                      placeholder="e.g. 7A9BK2"
+                      className="ludo-input-field text-center font-mono tracking-widest text-lg font-bold uppercase"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!connected || !roomCode.trim()}
+                    className={`mt-2 ludo-cta-button flex items-center justify-center gap-2 ${!connected || !roomCode.trim() ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  >
+                    {connected ? (
+                      <>
+                        <span>Join Game</span> <ArrowRight size={17} />
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin mr-1" />
+                        <span>Connecting to Server...</span>
+                      </>
+                    )}
+                  </button>
+                  {!connected && (
+                    <p className="text-[11px] text-amber-400/90 text-center font-medium animate-pulse">
+                      Connecting to multiplayer backend...
+                    </p>
+                  )}
+                </form>
+              )}
+            </>
+          ) : playMode === 'bot' ? (
+            <form onSubmit={handleStartBot} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                  <User size={13} className="text-emerald-400" /> Your Name
+                </label>
+                <input
+                  type="text"
+                  maxLength={18}
+                  value={playerName}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="e.g. Champion"
+                  className="ludo-input-field"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                  Choose Your Color
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {PLAYER_COLORS.map((color) => {
+                    const cfg = COLOR_CONFIG[color];
+                    const selected = botHumanColor === color;
+                    return (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setBotHumanColor(color)}
+                        className={`ludo-color-pill ${selected ? 'selected' : ''}`}
+                        style={
+                          selected
+                            ? {
+                                borderColor: cfg.hex,
+                                boxShadow: `0 0 14px ${cfg.hex}66`,
+                              }
+                            : undefined
+                        }
+                      >
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{ backgroundColor: cfg.hex }}
+                        />
+                        <span>{cfg.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                    <Users size={13} className="text-emerald-400" /> Players
+                  </label>
+                  <div className="ludo-chip-group">
+                    {[2, 3, 4].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setBotTotalPlayers(num as 2 | 3 | 4)}
+                        className={`ludo-chip ${botTotalPlayers === num ? 'active' : ''}`}
+                      >
+                        {num}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={!connected}
-                  className={`mt-2 ludo-cta-button flex items-center justify-center gap-2 ${!connected ? 'opacity-70 cursor-not-allowed' : ''}`}
-                >
-                  {connected ? (
-                    <>
-                      <Sparkles size={17} /> <span>Create Private Room</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin mr-1" />
-                      <span>Connecting to Server...</span>
-                    </>
-                  )}
-                </button>
-                {!connected && (
-                  <p className="text-[11px] text-amber-400/90 text-center font-medium animate-pulse">
-                    Connecting to multiplayer backend...
-                  </p>
-                )}
-              </form>
-            ) : (
-              <form onSubmit={handleJoin} className="flex flex-col gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                    <User size={13} className="text-cyan-400" /> Your Display Name
+                    <Clock size={13} className="text-emerald-400" /> Timer
                   </label>
-                  <input
-                    type="text"
-                    maxLength={18}
-                    value={playerName}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    placeholder="e.g. LuckyLudo"
-                    className="ludo-input-field"
-                  />
+                  <div className="ludo-chip-group">
+                    {[0, 15, 30].map((sec) => (
+                      <button
+                        key={sec}
+                        type="button"
+                        onClick={() => setBotTimer(sec)}
+                        className={`ludo-chip ${botTimer === sec ? 'active' : ''}`}
+                      >
+                        {sec === 0 ? 'Off' : `${sec}s`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="mt-2 ludo-cta-button flex items-center justify-center gap-2"
+                style={{
+                  background: 'linear-gradient(135deg, #10B981, #0D9488)',
+                  boxShadow: '0 10px 25px rgba(16, 185, 129, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3)',
+                }}
+              >
+                <Bot size={18} /> <span>Play vs Computer</span>
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleStartLocal} className="flex flex-col gap-3.5">
+              <div className="flex items-center justify-center gap-2 text-xs text-amber-300 font-semibold bg-amber-950/40 border border-amber-900/40 rounded-xl px-3 py-2">
+                <Smartphone size={14} className="shrink-0" />
+                <span>Play offline together on this device (2–4 Friends)</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                    <Users size={13} className="text-amber-400" /> Players
+                  </label>
+                  <div className="ludo-chip-group">
+                    {[2, 3, 4].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setLocalTotalPlayers(num as 2 | 3 | 4)}
+                        className={`ludo-chip ${localTotalPlayers === num ? 'active' : ''}`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                    <Hash size={13} className="text-cyan-400" /> 6-Digit Room Code
+                    <Clock size={13} className="text-amber-400" /> Timer
                   </label>
-                  <input
-                    type="text"
-                    value={roomCode}
-                    onChange={(e) => setRoomCode(sanitizeRoomCode(e.target.value))}
-                    placeholder="e.g. 7A9BK2"
-                    className="ludo-input-field text-center font-mono tracking-widest text-lg font-bold uppercase"
-                  />
+                  <div className="ludo-chip-group">
+                    {[0, 15, 30].map((sec) => (
+                      <button
+                        key={sec}
+                        type="button"
+                        onClick={() => setLocalTimer(sec)}
+                        className={`ludo-chip ${localTimer === sec ? 'active' : ''}`}
+                      >
+                        {sec === 0 ? 'Off' : `${sec}s`}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={!connected || !roomCode.trim()}
-                  className={`mt-2 ludo-cta-button flex items-center justify-center gap-2 ${!connected || !roomCode.trim() ? 'opacity-70 cursor-not-allowed' : ''}`}
-                >
-                  {connected ? (
-                    <>
-                      <span>Join Game</span> <ArrowRight size={17} />
-                    </>
-                  ) : (
-                    <>
-                      <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin mr-1" />
-                      <span>Connecting to Server...</span>
-                    </>
-                  )}
-                </button>
-                {!connected && (
-                  <p className="text-[11px] text-amber-400/90 text-center font-medium animate-pulse">
-                    Connecting to multiplayer backend...
-                  </p>
-                )}
-              </form>
-            )}
-          </>
-        ) : playMode === 'bot' ? (
-          <form onSubmit={handleStartBot} className="flex flex-col gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                <User size={13} className="text-emerald-400" /> Your Name
-              </label>
-              <input
-                type="text"
-                maxLength={18}
-                value={playerName}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="e.g. Champion"
-                className="ludo-input-field"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-                Your Color
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {PLAYER_COLORS.map((color) => {
+              <div className="grid grid-cols-2 gap-2.5">
+                {PLAYER_COLORS.slice(0, localTotalPlayers).map((color, idx) => {
                   const cfg = COLOR_CONFIG[color];
-                  const selected = botHumanColor === color;
                   return (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setBotHumanColor(color)}
-                      className={`py-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-                        selected
-                          ? 'bg-slate-800 border-white text-white shadow-md scale-[1.03]'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
-                      }`}
-                    >
+                    <div key={color} className="ludo-player-box">
                       <span
                         className="w-3 h-3 rounded-full shrink-0"
-                        style={{ backgroundColor: cfg.hex }}
+                        style={{
+                          backgroundColor: cfg.hex,
+                          boxShadow: `0 0 8px ${cfg.hex}88`,
+                        }}
                       />
-                      <span>{cfg.name}</span>
-                    </button>
+                      <input
+                        type="text"
+                        maxLength={14}
+                        value={localNames[idx]}
+                        onChange={(e) => {
+                          const updated = [...localNames];
+                          updated[idx] = e.target.value;
+                          setLocalNames(updated);
+                        }}
+                        placeholder={`Player ${idx + 1}`}
+                      />
+                    </div>
                   );
                 })}
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                  <Users size={13} className="text-emerald-400" /> Total Players
-                </label>
-                <div className="ludo-chip-group">
-                  {[2, 3, 4].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setBotTotalPlayers(num as 2 | 3 | 4)}
-                      className={`ludo-chip ${botTotalPlayers === num ? 'active' : ''}`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                  <Clock size={13} className="text-emerald-400" /> Timer
-                </label>
-                <div className="ludo-chip-group">
-                  {[0, 15, 30].map((sec) => (
-                    <button
-                      key={sec}
-                      type="button"
-                      onClick={() => setBotTimer(sec)}
-                      className={`ludo-chip ${botTimer === sec ? 'active' : ''}`}
-                    >
-                      {sec === 0 ? 'Off' : `${sec}s`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="mt-2 ludo-cta-button flex items-center justify-center gap-2"
-              style={{
-                background: 'linear-gradient(135deg, #10B981, #0D9488)',
-              }}
-            >
-              <Bot size={18} /> <span>Play vs Computer</span>
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleStartLocal} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                  <Users size={13} className="text-amber-400" /> Players
-                </label>
-                <div className="ludo-chip-group">
-                  {[2, 3, 4].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setLocalTotalPlayers(num as 2 | 3 | 4)}
-                      className={`ludo-chip ${localTotalPlayers === num ? 'active' : ''}`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                  <Clock size={13} className="text-amber-400" /> Timer
-                </label>
-                <div className="ludo-chip-group">
-                  {[0, 15, 30].map((sec) => (
-                    <button
-                      key={sec}
-                      type="button"
-                      onClick={() => setLocalTimer(sec)}
-                      className={`ludo-chip ${localTimer === sec ? 'active' : ''}`}
-                    >
-                      {sec === 0 ? 'Off' : `${sec}s`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              {PLAYER_COLORS.slice(0, localTotalPlayers).map((color, idx) => {
-                const cfg = COLOR_CONFIG[color];
-                return (
-                  <div
-                    key={color}
-                    className="flex items-center gap-2 bg-slate-950/70 border border-slate-800 rounded-xl px-2.5 py-2"
-                  >
-                    <span
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: cfg.hex }}
-                    />
-                    <input
-                      type="text"
-                      maxLength={14}
-                      value={localNames[idx]}
-                      onChange={(e) => {
-                        const updated = [...localNames];
-                        updated[idx] = e.target.value;
-                        setLocalNames(updated);
-                      }}
-                      placeholder={`Player ${idx + 1}`}
-                      className="w-full bg-transparent text-xs font-semibold text-white outline-none placeholder:text-slate-500"
-                    />
-                  </div>
-                );
-              })}
-            </div>
-
-            <button
-              type="submit"
-              className="mt-1 ludo-cta-button flex items-center justify-center gap-2"
-              style={{
-                background: 'linear-gradient(135deg, #F59E0B, #EA580C)',
-              }}
-            >
-              <Smartphone size={17} /> <span>Start Pass & Play ({localTotalPlayers}P)</span>
-            </button>
-          </form>
-        )}
+              <button
+                type="submit"
+                className="mt-1 ludo-cta-button flex items-center justify-center gap-2"
+                style={{
+                  background: 'linear-gradient(135deg, #F59E0B, #EA580C)',
+                  boxShadow: '0 10px 25px rgba(245, 158, 11, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3)',
+                }}
+              >
+                <Users size={17} /> <span>Start Offline Game ({localTotalPlayers} Players)</span>
+              </button>
+            </form>
+          )}
+        </div>
       </div>
 
       {/* Quick Rules Modal Button */}
