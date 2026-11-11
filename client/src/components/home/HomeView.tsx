@@ -152,7 +152,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       </div>
 
       {/* Main Action Card */}
-      <div className="w-full ludo-hero-card p-5 sm:p-6">
+      <div className="w-full ludo-hero-card p-6 sm:p-7">
         {/* Game Mode Selector */}
         <div className="ludo-mode-bar mb-5">
           <button
@@ -431,8 +431,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </button>
             </form>
           ) : (
-            <form onSubmit={handleStartLocal} className="flex flex-col gap-3.5">
-              <div className="flex items-center justify-center gap-2 text-xs text-amber-300 font-semibold bg-amber-950/40 border border-amber-900/40 rounded-xl px-3 py-2">
+            <form onSubmit={handleStartLocal} className="flex flex-col gap-4">
+              <div className="flex items-center justify-center gap-2 text-xs text-amber-300 font-semibold bg-amber-950/40 border border-amber-900/40 rounded-xl px-3 py-2.5">
                 <Smartphone size={14} className="shrink-0" />
                 <span>Play offline together on this device (2–4 Friends)</span>
               </div>
@@ -475,37 +475,42 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
-                {PLAYER_COLORS.slice(0, localTotalPlayers).map((color, idx) => {
-                  const cfg = COLOR_CONFIG[color];
-                  return (
-                    <div key={color} className="ludo-player-box">
-                      <span
-                        className="w-3 h-3 rounded-full shrink-0"
-                        style={{
-                          backgroundColor: cfg.hex,
-                          boxShadow: `0 0 8px ${cfg.hex}88`,
-                        }}
-                      />
-                      <input
-                        type="text"
-                        maxLength={14}
-                        value={localNames[idx]}
-                        onChange={(e) => {
-                          const updated = [...localNames];
-                          updated[idx] = e.target.value;
-                          setLocalNames(updated);
-                        }}
-                        placeholder={`Player ${idx + 1}`}
-                      />
-                    </div>
-                  );
-                })}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
+                  <User size={13} className="text-amber-400" /> Player Names
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {PLAYER_COLORS.slice(0, localTotalPlayers).map((color, idx) => {
+                    const cfg = COLOR_CONFIG[color];
+                    return (
+                      <div key={color} className="ludo-player-box">
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{
+                            backgroundColor: cfg.hex,
+                            boxShadow: `0 0 8px ${cfg.hex}88`,
+                          }}
+                        />
+                        <input
+                          type="text"
+                          maxLength={14}
+                          value={localNames[idx]}
+                          onChange={(e) => {
+                            const updated = [...localNames];
+                            updated[idx] = e.target.value;
+                            setLocalNames(updated);
+                          }}
+                          placeholder={`Player ${idx + 1}`}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <button
                 type="submit"
-                className="mt-1 ludo-cta-button flex items-center justify-center gap-2"
+                className="mt-2 ludo-cta-button flex items-center justify-center gap-2"
                 style={{
                   background: 'linear-gradient(135deg, #F59E0B, #EA580C)',
                   boxShadow: '0 10px 25px rgba(245, 158, 11, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3)',
