@@ -95,65 +95,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             className="lr-mode-glow"
             style={{ background: 'radial-gradient(circle, #22D3EE, transparent)' }}
           />
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 16,
-              }}
-            >
+          <div className="lr-mode-card-content">
+            <div className="lr-mode-card-header">
               <div
                 className="lr-mode-icon-wrap"
                 style={{
                   background: 'linear-gradient(135deg, #06B6D4, #2563EB)',
-                  boxShadow: '0 8px 22px rgba(6, 182, 212, 0.35)',
+                  boxShadow: '0 6px 18px rgba(6, 182, 212, 0.35)',
                 }}
               >
-                <Globe size={26} />
+                <Globe size={22} />
               </div>
-              <span
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: 9999,
-                  fontSize: 10,
-                  fontWeight: 800,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  background: connected ? 'rgba(16, 185, 129, 0.14)' : 'rgba(245, 158, 11, 0.14)',
-                  color: connected ? '#34D399' : '#FBBF24',
-                  border: connected
-                    ? '1px solid rgba(16, 185, 129, 0.35)'
-                    : '1px solid rgba(245, 158, 11, 0.35)',
-                }}
-              >
-                {connected ? 'Live Arena' : 'Connecting'}
-              </span>
+              <div className="lr-mode-text-block">
+                <div className="lr-mode-title-row">
+                  <h2 className="lr-mode-title">Play Online</h2>
+                  <span className="lr-mode-badge lr-mode-badge-cyan">
+                    {connected ? 'Live' : 'Connecting'}
+                  </span>
+                </div>
+                <p className="lr-mode-desc">
+                  Create custom rooms or join friends with a 6-digit code.
+                </p>
+              </div>
             </div>
 
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px' }}>
-              Play Online
-            </h2>
-            <p style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.45, margin: 0 }}>
-              Create a custom room or join friends worldwide with a 6-digit invite code.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingTop: 12,
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-              fontSize: 13,
-              fontWeight: 800,
-              color: '#67E8F9',
-            }}
-          >
-            <span>Enter Online Hub</span>
-            <ArrowRight size={16} />
+            <div className="lr-mode-action-link" style={{ color: '#67E8F9' }}>
+              <span>Enter Hub</span>
+              <ArrowRight size={15} />
+            </div>
           </div>
         </button>
 
@@ -167,63 +136,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             className="lr-mode-glow"
             style={{ background: 'radial-gradient(circle, #10B981, transparent)' }}
           />
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 16,
-              }}
-            >
+          <div className="lr-mode-card-content">
+            <div className="lr-mode-card-header">
               <div
                 className="lr-mode-icon-wrap"
                 style={{
                   background: 'linear-gradient(135deg, #10B981, #0D9488)',
-                  boxShadow: '0 8px 22px rgba(16, 185, 129, 0.35)',
+                  boxShadow: '0 6px 18px rgba(16, 185, 129, 0.35)',
                 }}
               >
-                <Bot size={26} />
+                <Bot size={22} />
               </div>
-              <span
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: 9999,
-                  fontSize: 10,
-                  fontWeight: 800,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  background: 'rgba(16, 185, 129, 0.14)',
-                  color: '#6EE7B7',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                }}
-              >
-                Solo AI
-              </span>
+              <div className="lr-mode-text-block">
+                <div className="lr-mode-title-row">
+                  <h2 className="lr-mode-title">vs Computer</h2>
+                  <span className="lr-mode-badge lr-mode-badge-emerald">
+                    Solo AI
+                  </span>
+                </div>
+                <p className="lr-mode-desc">
+                  Play offline with smart bots across Easy, Medium, and Hard.
+                </p>
+              </div>
             </div>
 
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px' }}>
-              vs Computer
-            </h2>
-            <p style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.45, margin: 0 }}>
-              Battle smart CPU bots with Easy, Medium, and Hard difficulty levels.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingTop: 12,
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-              fontSize: 13,
-              fontWeight: 800,
-              color: '#34D399',
-            }}
-          >
-            <span>Configure Match</span>
-            <ArrowRight size={16} />
+            <div className="lr-mode-action-link" style={{ color: '#34D399' }}>
+              <span>Play AI</span>
+              <ArrowRight size={15} />
+            </div>
           </div>
         </button>
 
@@ -237,63 +177,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             className="lr-mode-glow"
             style={{ background: 'radial-gradient(circle, #F59E0B, transparent)' }}
           />
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 16,
-              }}
-            >
+          <div className="lr-mode-card-content">
+            <div className="lr-mode-card-header">
               <div
                 className="lr-mode-icon-wrap"
                 style={{
                   background: 'linear-gradient(135deg, #F59E0B, #EA580C)',
-                  boxShadow: '0 8px 22px rgba(245, 158, 11, 0.35)',
+                  boxShadow: '0 6px 18px rgba(245, 158, 11, 0.35)',
                 }}
               >
-                <Users size={26} />
+                <Users size={22} />
               </div>
-              <span
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: 9999,
-                  fontSize: 10,
-                  fontWeight: 800,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  background: 'rgba(245, 158, 11, 0.14)',
-                  color: '#FDE047',
-                  border: '1px solid rgba(245, 158, 11, 0.3)',
-                }}
-              >
-                2–4 Players
-              </span>
+              <div className="lr-mode-text-block">
+                <div className="lr-mode-title-row">
+                  <h2 className="lr-mode-title">Pass &amp; Play</h2>
+                  <span className="lr-mode-badge lr-mode-badge-amber">
+                    2–4 Players
+                  </span>
+                </div>
+                <p className="lr-mode-desc">
+                  Gather friends on one device for classic offline Ludo.
+                </p>
+              </div>
             </div>
 
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px' }}>
-              Pass &amp; Play
-            </h2>
-            <p style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.45, margin: 0 }}>
-              Gather around one device for classic offline Ludo — no internet required.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingTop: 12,
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-              fontSize: 13,
-              fontWeight: 800,
-              color: '#FBBF24',
-            }}
-          >
-            <span>Setup Offline Game</span>
-            <ArrowRight size={16} />
+            <div className="lr-mode-action-link" style={{ color: '#FBBF24' }}>
+              <span>Pass &amp; Play</span>
+              <ArrowRight size={15} />
+            </div>
           </div>
         </button>
       </div>
@@ -305,30 +216,29 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 10,
-          marginTop: 4,
+          gap: 8,
+          marginTop: 2,
         }}
       >
         <button
           type="button"
           onClick={onOpenRules}
           className="lr-icon-btn cursor-pointer"
-          style={{ height: 38, padding: '0 16px', borderRadius: 9999 }}
+          style={{ height: 32, padding: '0 12px', borderRadius: 9999, fontSize: 12 }}
         >
-          <BookOpen size={15} color="#22D3EE" />
-          <span>How to Play &amp; Rules</span>
+          <BookOpen size={14} color="#22D3EE" />
+          <span>Rules</span>
         </button>
 
         <button
           type="button"
           onClick={onOpenProfile}
           className="lr-icon-btn cursor-pointer"
-          style={{ height: 38, padding: '0 16px', borderRadius: 9999 }}
+          style={{ height: 32, padding: '0 12px', borderRadius: 9999, fontSize: 12 }}
         >
-          <Trophy size={15} color="#FBBF24" />
+          <Trophy size={14} color="#FBBF24" />
           <span>
-            Career: {profile.wins} {profile.wins === 1 ? 'Win' : 'Wins'} / {profile.gamesPlayed}{' '}
-            {profile.gamesPlayed === 1 ? 'Game' : 'Games'}
+            {profile.wins}W / {profile.gamesPlayed}G
           </span>
         </button>
       </div>

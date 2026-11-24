@@ -165,14 +165,14 @@ export const App: React.FC = () => {
 
       /* Screen 9 & 10: Live Gameplay & Result Experience (coins/board 100% preserved) */
       return (
-        <div className="w-full max-w-4xl flex flex-col items-center gap-1 sm:gap-1.5 h-full justify-center">
+        <div className="w-full max-w-4xl flex flex-col items-center justify-between sm:justify-center gap-0.5 sm:gap-1.5 h-full max-h-full overflow-hidden">
           {/* Top Status & Turn Bar */}
           <div
-            style={{ minHeight: '36px', height: '36px' }}
-            className="w-full max-w-[600px] glass-panel px-3 py-1 flex items-center justify-between gap-2 shrink-0"
+            style={{ minHeight: '30px', height: '30px' }}
+            className="w-full max-w-[600px] glass-panel px-2.5 py-0.5 flex items-center justify-between gap-1.5 shrink-0"
           >
             {/* Left: Active turn indicator */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
               <span
                 className="w-2 h-2 rounded-full animate-ping shrink-0"
                 style={{
@@ -187,7 +187,7 @@ export const App: React.FC = () => {
                 }}
               />
               <span
-                className="font-black text-xs px-2.5 py-0.5 rounded-full text-white shadow-sm flex items-center gap-1 shrink-0 font-display tracking-wide"
+                className="font-black text-[11px] sm:text-xs px-2 py-0.5 rounded-full text-white shadow-sm flex items-center gap-1 shrink-0 font-display tracking-wide"
                 style={{
                   backgroundColor:
                     activePlayer?.color === 'red'
@@ -208,15 +208,15 @@ export const App: React.FC = () => {
             </div>
 
             {/* Right: Last Action Message */}
-            <div className="text-[11px] text-slate-300 font-semibold truncate bg-slate-900/60 px-2.5 py-0.5 rounded-lg border border-slate-700/40 text-right">
+            <div className="text-[10px] sm:text-[11px] text-slate-300 font-semibold truncate bg-slate-900/60 px-2 py-0.5 rounded-lg border border-slate-700/40 text-right max-w-[200px] sm:max-w-none">
               {gameState.lastActionMessage || 'Game in progress...'}
             </div>
           </div>
 
           {/* Top Players Row (Red = Left, Green = Right) */}
           <div
-            style={{ height: '42px', minHeight: '42px', maxHeight: '42px' }}
-            className="w-full grid grid-cols-2 gap-2 max-w-[600px] shrink-0"
+            style={{ height: '36px', minHeight: '36px', maxHeight: '38px' }}
+            className="w-full grid grid-cols-2 gap-1.5 sm:gap-2 max-w-[600px] shrink-0"
           >
             <div className="h-full flex items-center">
               {gameState.players.find((p) => p.color === 'red') && (
@@ -246,10 +246,10 @@ export const App: React.FC = () => {
 
           {/* TOP DICE TRAY */}
           <div
-            style={{ height: '56px', minHeight: '56px', maxHeight: '56px' }}
-            className="w-full max-w-[600px] flex items-center justify-between px-3 sm:px-6 shrink-0"
+            style={{ height: '46px', minHeight: '46px', maxHeight: '48px' }}
+            className="w-full max-w-[600px] flex items-center justify-between px-2 sm:px-6 shrink-0"
           >
-            <div className="w-[48%] flex items-center justify-start px-2 h-full">
+            <div className="w-[48%] flex items-center justify-start px-1 h-full">
               {isRedActive && activePlayer && (
                 <Dice
                   color="red"
@@ -257,13 +257,13 @@ export const App: React.FC = () => {
                   isRolling={isRolling}
                   canRoll={canRoll}
                   onRoll={rollDice}
-                  size={48}
+                  size={42}
                   align="left"
                 />
               )}
             </div>
 
-            <div className="w-[48%] flex items-center justify-end px-2 h-full">
+            <div className="w-[48%] flex items-center justify-end px-1 h-full">
               {isGreenActive && activePlayer && (
                 <Dice
                   color="green"
@@ -271,7 +271,7 @@ export const App: React.FC = () => {
                   isRolling={isRolling}
                   canRoll={canRoll}
                   onRoll={rollDice}
-                  size={48}
+                  size={42}
                   align="right"
                 />
               )}
@@ -279,7 +279,7 @@ export const App: React.FC = () => {
           </div>
 
           {/* Central 15x15 Ludo Board (Tokens & Board internal code UNTOUCHED) */}
-          <div className="lr-board-halo">
+          <div className="lr-board-halo shrink-0">
             <LudoBoard
               gameState={gameState}
               localPlayer={localPlayer}
@@ -292,10 +292,10 @@ export const App: React.FC = () => {
 
           {/* BOTTOM DICE TRAY */}
           <div
-            style={{ height: '56px', minHeight: '56px', maxHeight: '56px' }}
-            className="w-full max-w-[600px] flex items-center justify-between px-3 sm:px-6 shrink-0"
+            style={{ height: '46px', minHeight: '46px', maxHeight: '48px' }}
+            className="w-full max-w-[600px] flex items-center justify-between px-2 sm:px-6 shrink-0"
           >
-            <div className="w-[48%] flex items-center justify-start px-2 h-full">
+            <div className="w-[48%] flex items-center justify-start px-1 h-full">
               {isBlueActive && activePlayer && (
                 <Dice
                   color="blue"
@@ -303,13 +303,13 @@ export const App: React.FC = () => {
                   isRolling={isRolling}
                   canRoll={canRoll}
                   onRoll={rollDice}
-                  size={48}
+                  size={42}
                   align="left"
                 />
               )}
             </div>
 
-            <div className="w-[48%] flex items-center justify-end px-2 h-full">
+            <div className="w-[48%] flex items-center justify-end px-1 h-full">
               {isYellowActive && activePlayer && (
                 <Dice
                   color="yellow"
@@ -317,7 +317,7 @@ export const App: React.FC = () => {
                   isRolling={isRolling}
                   canRoll={canRoll}
                   onRoll={rollDice}
-                  size={48}
+                  size={42}
                   align="right"
                 />
               )}
@@ -326,8 +326,8 @@ export const App: React.FC = () => {
 
           {/* Bottom Players Row (Blue = Left, Yellow = Right) */}
           <div
-            style={{ height: '42px', minHeight: '42px', maxHeight: '42px' }}
-            className="w-full grid grid-cols-2 gap-2 max-w-[600px] shrink-0"
+            style={{ height: '36px', minHeight: '36px', maxHeight: '38px' }}
+            className="w-full grid grid-cols-2 gap-1.5 sm:gap-2 max-w-[600px] shrink-0"
           >
             <div className="h-full flex items-center">
               {gameState.players.find((p) => p.color === 'blue') && (
@@ -356,7 +356,7 @@ export const App: React.FC = () => {
           </div>
 
           {/* Emoji Reaction Bar */}
-          <div className="mt-1">
+          <div className="mt-0.5 sm:mt-1 shrink-0">
             <ReactionBar onReact={sendReaction} />
           </div>
 

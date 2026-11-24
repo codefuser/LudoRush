@@ -800,21 +800,27 @@ input.ludo-input-field:focus,
 }
 
 .board-container {
-  width: min(92vw, calc(100dvh - 300px), 480px);
+  width: min(92vw, calc(100dvh - 270px), 430px);
   aspect-ratio: 1 / 1;
   position: relative;
   margin: 0 auto;
 }
 
-@media (max-height: 720px) {
+@media (max-height: 760px) {
   .board-container {
-    width: min(90vw, calc(100dvh - 250px), 400px);
+    width: min(90vw, calc(100dvh - 240px), 370px);
   }
 }
 
-@media (max-height: 600px) {
+@media (max-height: 660px) {
   .board-container {
-    width: min(86vw, calc(100dvh - 200px), 330px);
+    width: min(88vw, calc(100dvh - 215px), 320px);
+  }
+}
+
+@media (max-height: 560px) {
+  .board-container {
+    width: min(84vw, calc(100dvh - 190px), 260px);
   }
 }
 

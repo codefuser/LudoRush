@@ -35,11 +35,10 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   return (
     <div
       style={{
-        height: '42px',
-        minHeight: '42px',
+        height: '100%',
         maxHeight: '42px',
       }}
-      className={`w-full flex items-center justify-between px-2.5 py-1 rounded-xl transition-all duration-300 relative select-none ${
+      className={`w-full flex items-center justify-between px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl transition-all duration-300 relative select-none ${
         isActive
           ? 'bg-slate-800/90 ring-2 ring-white/30 shadow-md'
           : 'bg-slate-900/40 hover:bg-slate-800/50'
