@@ -71,12 +71,18 @@ export function useMultiplayer() {
     const rawEnv = import.meta.env.VITE_SERVER_URL;
     const cleanEnv = typeof rawEnv === 'string' ? rawEnv.trim() : '';
 
+    const isCapacitor =
+      typeof window !== 'undefined' &&
+      (Boolean((window as any).Capacitor?.isNativePlatform?.()) ||
+        window.location.protocol === 'capacitor:');
+
     const isLocalhost =
+      !isCapacitor &&
       typeof window !== 'undefined' &&
       (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
     // On localhost, allow undefined if no VITE_SERVER_URL is provided (uses Vite proxy /api and /socket.io)
-    // On production (e.g. Vercel deployment), always connect directly to the Render live backend URL!
+    // On production or mobile app (Capacitor), always connect directly to the Render live backend URL!
     const serverUrl = isLocalhost
       ? (cleanEnv || undefined)
       : (cleanEnv || 'https://ludorush.onrender.com');
