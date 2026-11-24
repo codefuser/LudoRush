@@ -1,7 +1,7 @@
 import React from 'react';
 import { Globe, Bot, Users, ArrowRight, Sparkles, BookOpen, Trophy } from 'lucide-react';
 import { COLOR_CONFIG, PLAYER_COLORS } from '@ludo/shared';
-import { PlayerProfile } from '../../hooks/usePlayerProfile.js';
+import { PlayerProfile, getLevelInfo } from '../../hooks/usePlayerProfile.js';
 import { AvatarBadge } from '../common/AvatarBadge.js';
 
 interface HomeScreenProps {
@@ -24,6 +24,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenRules,
 }) => {
   const displayName = profile.name.trim() || 'Challenger';
+  const levelInfo = getLevelInfo(profile.xp || 0);
 
   return (
     <div className="lr-page-wide lr-screen-enter">
@@ -33,10 +34,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           type="button"
           onClick={onOpenProfile}
           className="lr-welcome-pill cursor-pointer"
-          title="Edit profile & avatar"
+          title="Edit profile, skins & level"
         >
           <AvatarBadge avatar={profile.avatar} size="xs" />
-          <span>Welcome back, {displayName}</span>
+          <span>
+            {displayName} • <strong style={{ color: '#FDE047' }}>{levelInfo.badge} Lv.{levelInfo.level}</strong>
+          </span>
           <Sparkles size={13} />
         </button>
 

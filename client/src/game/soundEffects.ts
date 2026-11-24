@@ -189,6 +189,111 @@ class SoundService {
       offset += n.d;
     });
   }
+
+  public playFire() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.35);
+  }
+
+  public playLaugh() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    [480, 620, 520, 680].forEach((freq, i) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + i * 0.08);
+      gain.gain.setValueAtTime(0.25, now + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.07);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.08);
+      osc.stop(now + i * 0.08 + 0.07);
+    });
+  }
+
+  public playClap() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    [0, 0.06, 0.12].forEach((offset) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(800 + Math.random() * 200, now + offset);
+      gain.gain.setValueAtTime(0.3, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + offset + 0.04);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.045);
+    });
+  }
+
+  public playCrown() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    [587.33, 739.99, 880, 1174.66].forEach((f, i) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, now + i * 0.07);
+      gain.gain.setValueAtTime(0.28, now + i * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.07 + 0.2);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.07);
+      osc.stop(now + i * 0.07 + 0.22);
+    });
+  }
+
+  public playChat() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(540, now);
+    osc.frequency.exponentialRampToValueAtTime(820, now + 0.12);
+    gain.gain.setValueAtTime(0.28, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  }
+
+  public playReaction(emoji: string) {
+    if (emoji.includes('🔥')) this.playFire();
+    else if (emoji.includes('😂')) this.playLaugh();
+    else if (emoji.includes('👏')) this.playClap();
+    else if (emoji.includes('👑')) this.playCrown();
+    else if (emoji.includes('🎲')) this.playRoll();
+    else this.playChat();
+  }
 }
 
 export const sounds = new SoundService();

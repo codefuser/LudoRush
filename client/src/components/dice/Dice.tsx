@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PlayerColor, COLOR_CONFIG } from '@ludo/shared';
 import { sounds } from '../../game/soundEffects.js';
+import { DiceSkin } from '../../hooks/usePlayerProfile.js';
 
 interface DiceProps {
   color: PlayerColor;
@@ -10,6 +11,7 @@ interface DiceProps {
   onRoll: () => void;
   size?: number;
   align?: 'left' | 'right';
+  skin?: DiceSkin;
 }
 
 export const Dice: React.FC<DiceProps> = ({
@@ -20,6 +22,7 @@ export const Dice: React.FC<DiceProps> = ({
   onRoll,
   size = 52,
   align = 'left',
+  skin = 'neon',
 }) => {
   const config = COLOR_CONFIG[color];
   const halfSize = size / 2;
@@ -118,6 +121,13 @@ export const Dice: React.FC<DiceProps> = ({
 
     const pips = pipCoordsMap[faceNumber] || pipCoordsMap[1];
 
+    let pipBg = faceNumber === 1 ? config.hex : '#1E293B';
+    if (skin === 'gold') {
+      pipBg = faceNumber === 1 ? '#DC2626' : '#78350F';
+    } else if (skin === 'wood') {
+      pipBg = faceNumber === 1 ? '#F87171' : '#FEF3C7';
+    }
+
     return (
       <>
         {[0, 1, 2].map((r) =>
@@ -131,7 +141,8 @@ export const Dice: React.FC<DiceProps> = ({
                     style={{
                       width: `${pipSize}px`,
                       height: `${pipSize}px`,
-                      backgroundColor: faceNumber === 1 ? config.hex : '#1E293B',
+                      backgroundColor: pipBg,
+                      boxShadow: skin === 'gold' && faceNumber === 1 ? '0 0 4px #EF4444' : undefined,
                     }}
                   />
                 )}
@@ -141,6 +152,29 @@ export const Dice: React.FC<DiceProps> = ({
         )}
       </>
     );
+  };
+
+  const getFaceStyle = (baseTransform: string) => {
+    let background = '#F8FAFC';
+    let borderColor = '#CBD5E1';
+    let boxShadow = 'inset 0 1px 2px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.12)';
+
+    if (skin === 'gold') {
+      background = 'linear-gradient(135deg, #FEF08A 0%, #F59E0B 50%, #B45309 100%)';
+      borderColor = '#FBBF24';
+      boxShadow = 'inset 0 1px 3px rgba(255,255,255,0.7), inset 0 -2px 4px rgba(0,0,0,0.4)';
+    } else if (skin === 'wood') {
+      background = 'linear-gradient(135deg, #78350F 0%, #451A03 100%)';
+      borderColor = '#92400E';
+      boxShadow = 'inset 0 1px 2px rgba(254,243,199,0.3), inset 0 -2px 4px rgba(0,0,0,0.5)';
+    }
+
+    return {
+      transform: baseTransform,
+      background,
+      borderColor,
+      boxShadow,
+    };
   };
 
   return (
@@ -182,7 +216,7 @@ export const Dice: React.FC<DiceProps> = ({
           {/* Face 1: Front */}
           <div
             className="dice-3d-face"
-            style={{ transform: `rotateY(0deg) translateZ(${halfSize}px)` }}
+            style={getFaceStyle(`rotateY(0deg) translateZ(${halfSize}px)`)}
           >
             {renderFacePips(1)}
           </div>
@@ -190,7 +224,7 @@ export const Dice: React.FC<DiceProps> = ({
           {/* Face 2: Top */}
           <div
             className="dice-3d-face"
-            style={{ transform: `rotateX(90deg) translateZ(${halfSize}px)` }}
+            style={getFaceStyle(`rotateX(90deg) translateZ(${halfSize}px)`)}
           >
             {renderFacePips(2)}
           </div>
@@ -198,7 +232,7 @@ export const Dice: React.FC<DiceProps> = ({
           {/* Face 3: Right */}
           <div
             className="dice-3d-face"
-            style={{ transform: `rotateY(90deg) translateZ(${halfSize}px)` }}
+            style={getFaceStyle(`rotateY(90deg) translateZ(${halfSize}px)`)}
           >
             {renderFacePips(3)}
           </div>
@@ -206,7 +240,7 @@ export const Dice: React.FC<DiceProps> = ({
           {/* Face 4: Left */}
           <div
             className="dice-3d-face"
-            style={{ transform: `rotateY(-90deg) translateZ(${halfSize}px)` }}
+            style={getFaceStyle(`rotateY(-90deg) translateZ(${halfSize}px)`)}
           >
             {renderFacePips(4)}
           </div>
@@ -214,7 +248,7 @@ export const Dice: React.FC<DiceProps> = ({
           {/* Face 5: Bottom */}
           <div
             className="dice-3d-face"
-            style={{ transform: `rotateX(-90deg) translateZ(${halfSize}px)` }}
+            style={getFaceStyle(`rotateX(-90deg) translateZ(${halfSize}px)`)}
           >
             {renderFacePips(5)}
           </div>
@@ -222,7 +256,7 @@ export const Dice: React.FC<DiceProps> = ({
           {/* Face 6: Back */}
           <div
             className="dice-3d-face"
-            style={{ transform: `rotateY(180deg) translateZ(${halfSize}px)` }}
+            style={getFaceStyle(`rotateY(180deg) translateZ(${halfSize}px)`)}
           >
             {renderFacePips(6)}
           </div>

@@ -19,6 +19,7 @@ import { GameOverModal } from './components/results/GameOverModal.js';
 import { ReactionBar } from './components/common/ReactionBar.js';
 import { ProfileModal } from './components/modals/ProfileModal.js';
 import { SettingsModal } from './components/modals/SettingsModal.js';
+import { sounds } from './game/soundEffects.js';
 
 type AppScreen =
   | 'splash'
@@ -47,6 +48,8 @@ export const App: React.FC = () => {
     updateAvatar,
     toggleSound,
     toggleParticles,
+    updateDiceSkin,
+    updateBoardTheme,
     recordMatch,
     resetStats,
   } = usePlayerProfile();
@@ -71,6 +74,18 @@ export const App: React.FC = () => {
   const isRolling = isLocalActive ? local.isRolling : remote.isRolling;
   const pendingMove = isLocalActive ? local.pendingMove : remote.pendingMove;
   const reactions = isLocalActive ? local.reactions : remote.reactions;
+
+  // Audio trigger for reactions & chat taunts
+  const prevReactionsLenRef = useRef(reactions.length);
+  useEffect(() => {
+    if (reactions.length > prevReactionsLenRef.current) {
+      const latest = reactions[reactions.length - 1];
+      if (latest) {
+        sounds.playReaction(latest.emoji);
+      }
+    }
+    prevReactionsLenRef.current = reactions.length;
+  }, [reactions]);
 
   const rollDice = isLocalActive ? local.rollDice : remote.rollDice;
   const moveToken = isLocalActive ? local.moveToken : remote.moveToken;
@@ -253,6 +268,7 @@ export const App: React.FC = () => {
               {isRedActive && activePlayer && (
                 <Dice
                   color="red"
+                  skin={profile.diceSkin}
                   value={gameState.currentRoll}
                   isRolling={isRolling}
                   canRoll={canRoll}
@@ -267,6 +283,7 @@ export const App: React.FC = () => {
               {isGreenActive && activePlayer && (
                 <Dice
                   color="green"
+                  skin={profile.diceSkin}
                   value={gameState.currentRoll}
                   isRolling={isRolling}
                   canRoll={canRoll}
@@ -279,7 +296,7 @@ export const App: React.FC = () => {
           </div>
 
           {/* Central 15x15 Ludo Board (Tokens & Board internal code UNTOUCHED) */}
-          <div className="lr-board-halo shrink-0">
+          <div className={`lr-board-halo shrink-0 is-theme-${profile.boardTheme || 'cyber'}`}>
             <LudoBoard
               gameState={gameState}
               localPlayer={localPlayer}
@@ -299,6 +316,7 @@ export const App: React.FC = () => {
               {isBlueActive && activePlayer && (
                 <Dice
                   color="blue"
+                  skin={profile.diceSkin}
                   value={gameState.currentRoll}
                   isRolling={isRolling}
                   canRoll={canRoll}
@@ -313,6 +331,7 @@ export const App: React.FC = () => {
               {isYellowActive && activePlayer && (
                 <Dice
                   color="yellow"
+                  skin={profile.diceSkin}
                   value={gameState.currentRoll}
                   isRolling={isRolling}
                   canRoll={canRoll}
@@ -497,7 +516,7 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Multi-Particle Reaction Fountain */}
+      {/* Floating Reactions & Quick Chat Bubbles */}
       <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
         {reactions.map((r) => {
           const targetPos =
@@ -510,6 +529,22 @@ export const App: React.FC = () => {
               : r.targetColor === 'yellow'
               ? { left: '75%', top: '78%' }
               : { left: '50%', bottom: '15%' };
+
+          const isChatTaunt = r.emoji.length > 2;
+
+          if (isChatTaunt) {
+            return (
+              <div
+                key={r.id}
+                className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
+                style={targetPos}
+              >
+                <div className="lr-chat-bubble">
+                  <span>{r.emoji}</span>
+                </div>
+              </div>
+            );
+          }
 
           const animName =
             r.emoji === '🔥'
@@ -566,6 +601,8 @@ export const App: React.FC = () => {
           profile={profile}
           onUpdateName={updateName}
           onUpdateAvatar={updateAvatar}
+          onUpdateDiceSkin={updateDiceSkin}
+          onUpdateBoardTheme={updateBoardTheme}
           onResetStats={resetStats}
           onClose={() => setShowProfileModal(false)}
         />
