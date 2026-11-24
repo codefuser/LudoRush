@@ -1,11 +1,3 @@
-import React from 'react';
-
-interface ReactionBarProps {
-  onReact: (emoji: string) => void;
-}
-
-const EMOJIS = ['🔥', '😂', '🎲', '👑', '😱', '👏'];
-
 import React, { useState } from 'react';
 import { MessageSquare, X } from 'lucide-react';
 
