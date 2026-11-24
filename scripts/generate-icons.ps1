@@ -1,4 +1,4 @@
-﻿# Generate Ludo Rush App Icons for Android (all mipmap densities) and Web
+# Generate Ludo Rush App Icons for Android (all mipmap densities) and Web
 Add-Type -AssemblyName System.Drawing
 
 $rootDir = Split-Path -Parent $PSScriptRoot
